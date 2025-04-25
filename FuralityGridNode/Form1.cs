@@ -297,13 +297,16 @@ namespace FuralityGridNode
             OpenFileDialog f = new OpenFileDialog();
             f.Filter = "Image files (*.png) | *.png";
 
-            if (f.ShowDialog() != DialogResult.OK)
+            if (f.ShowDialog() != DialogResult.OK) // Make sure the user clicked ok
                 return;
 
-            if (!File.Exists(f.FileName))
+            if (!File.Exists(f.FileName)) // Make sure the file exists
                 return;
 
             var (data, sizeX, sizeY) = Utils.ReadPng(f.FileName);
+
+            if(data == null) // Make sure it loaded correctly
+                return;
 
             int pixelsX = sizeX / 16;
             int pixelsY = sizeY / 16;
@@ -315,6 +318,7 @@ namespace FuralityGridNode
             {
                 for (int y = 0; y < pixelsY; y++)
                 {
+                    // Check if all 16 pixels are fully transparent
                     bool found = true;
                     for (int X = 0; X < 16; X++)
                     {
@@ -337,9 +341,11 @@ namespace FuralityGridNode
                         if (!found)
                             break;
                     }
-                    // Fill the pixel
+
+                    // If they are, fill the pixel with checkerboard
                     if (found)
                     {
+                        // Save coordinate for json
                         float tX = (x * 16 + 8) / (float)sizeX;
                         float tY = (y * 16 + 8) / (float)sizeY;
                         Coords.Add((tX, tY));
@@ -357,7 +363,7 @@ namespace FuralityGridNode
                                 data[i * 4 + 1] = 0;
                                 data[i * 4 + 2] = 255;
                                 data[i * 4 + 3] = 255;
-                                if ((x % 2) == (y % 2))
+                                if ((x % 2) == (y % 2)) // Pink and black checkerboard pattern
                                 {
                                     data[i * 4 + 0] = 0;
                                     data[i * 4 + 1] = 0;
