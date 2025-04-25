@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
+using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FuralityGridNode
@@ -297,6 +290,92 @@ namespace FuralityGridNode
         {
             RestartClient();
             DrawData();
+        }
+
+        private void PackDMX_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog f = new OpenFileDialog();
+            f.Filter = "Image files (*.png) | *.png";
+
+            if (f.ShowDialog() != DialogResult.OK)
+                return;
+
+            if (!File.Exists(f.FileName))
+                return;
+
+            var (data, sizeX, sizeY) = Utils.ReadPng(f.FileName);
+
+            int pixelsX = sizeX / 16;
+            int pixelsY = sizeY / 16;
+
+            List<(float x, float y)> Coords = new List<(float x, float y)> ();
+
+            int FilledPixelCount = 0;
+            for (int x = 0; x < pixelsX; x++)
+            {
+                for (int y = 0; y < pixelsY; y++)
+                {
+                    bool found = true;
+                    for (int X = 0; X < 16; X++)
+                    {
+                        for (int Y = 0; Y < 16; Y++)
+                        {
+                            int lX = x * 16 + X;
+                            int lY = y * 16 + Y;
+
+                            int i = lX + lY * sizeX;
+                            byte R = data[i * 4 + 0];
+                            byte G = data[i * 4 + 1];
+                            byte B = data[i * 4 + 2];
+                            byte A = data[i * 4 + 3];
+                            if (A > 0)
+                            {
+                                found = false;
+                                break;
+                            }
+                        }
+                        if (!found)
+                            break;
+                    }
+                    // Fill the pixel
+                    if (found)
+                    {
+                        float tX = (x * 16 + 8) / (float)sizeX;
+                        float tY = (y * 16 + 8) / (float)sizeY;
+                        Coords.Add((tX, tY));
+
+                        FilledPixelCount++;
+                        for (int X = 0; X < 16; X++)
+                        {
+                            for (int Y = 0; Y < 16; Y++)
+                            {
+                                int lX = x * 16 + X;
+                                int lY = y * 16 + Y;
+
+                                int i = lX + lY * sizeX;
+                                data[i * 4 + 0] = 255;
+                                data[i * 4 + 1] = 0;
+                                data[i * 4 + 2] = 255;
+                                data[i * 4 + 3] = 255;
+                                if ((x % 2) == (y % 2))
+                                {
+                                    data[i * 4 + 0] = 0;
+                                    data[i * 4 + 1] = 0;
+                                    data[i * 4 + 2] = 0;
+                                    data[i * 4 + 3] = 255;
+                                }
+                                
+                            }
+                        }
+                    }
+                }
+            }
+
+            string json = JsonSerializer.Serialize(Coords, new JsonSerializerOptions { IncludeFields = true });
+            json = json.Replace("Item1", "x");
+            json = json.Replace("Item2", "y");
+            File.WriteAllText("DMXPack.json", json);
+            Utils.WritePng("DMXPack.png", data, sizeX, sizeY);
         }
     }
 }

@@ -41,6 +41,7 @@
             this.portInput = new System.Windows.Forms.TextBox();
             this.ipInput = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.PackDMX = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.configPanel.SuspendLayout();
             this.SuspendLayout();
@@ -69,6 +70,7 @@
             // 
             // configPanel
             // 
+            this.configPanel.Controls.Add(this.PackDMX);
             this.configPanel.Controls.Add(this.statusLabel);
             this.configPanel.Controls.Add(this.colorTypeDropdown);
             this.configPanel.Controls.Add(this.label3);
@@ -155,6 +157,16 @@
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // PackDMX
+            // 
+            this.PackDMX.Location = new System.Drawing.Point(6, 158);
+            this.PackDMX.Name = "PackDMX";
+            this.PackDMX.Size = new System.Drawing.Size(75, 23);
+            this.PackDMX.TabIndex = 9;
+            this.PackDMX.Text = "Pack DMX";
+            this.PackDMX.UseVisualStyleBackColor = true;
+            this.PackDMX.Click += new System.EventHandler(this.PackDMX_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -190,6 +202,7 @@
         private System.Windows.Forms.ComboBox colorTypeDropdown;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.Label statusLabel;
+        private System.Windows.Forms.Button PackDMX;
     }
 }
 
