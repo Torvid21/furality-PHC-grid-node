@@ -1,0 +1,11 @@
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.csproj.AssemblyReference.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.csproj.SuggestedBindingRedirects.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.dll.config
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.Form1.resources
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.Properties.Resources.resources
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.csproj.GenerateResource.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.GeneratedMSBuildEditorConfig.editorconfig
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.AssemblyInfoInputs.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.AssemblyInfo.cs
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.csproj.CoreCompileInputs.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net8.0-windows\FuralityGridNode.sourcelink.json

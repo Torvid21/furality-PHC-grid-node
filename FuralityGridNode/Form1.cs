@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -295,7 +296,7 @@ namespace FuralityGridNode
         private void button1_Click(object sender, EventArgs e)
         {
             Trace.WriteLine("Button1 Clicked");
-            artnetClient.RestartClient();
+            artnetClient.RestartClient(ipInput.Text, portInput.Text);
             //RestartClient();
             //StartArtNetClient();
         }
