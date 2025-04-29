@@ -1,4 +1,9 @@
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\net481\FuralityGridNode.exe.config
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\net481\FuralityGridNode.exe
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\net481\FuralityGridNode.pdb
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.csproj.AssemblyReference.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.csproj.SuggestedBindingRedirects.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.exe.config
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.Form1.resources
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.Properties.Resources.resources
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.csproj.GenerateResource.cache
@@ -7,12 +12,7 @@ A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\Fur
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.AssemblyInfo.cs
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.csproj.CoreCompileInputs.cache
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.sourcelink.json
-A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\net481\FuralityGridNode.exe.config
-A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\net481\FuralityGridNode.exe
-A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\net481\FuralityGridNode.pdb
-A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.exe
-A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.pdb
-A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.csproj.SuggestedBindingRedirects.cache
-A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.exe.config
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.csproj.Fody.CopyLocal.cache
 A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.csproj.Fody.RuntimeCopyLocal.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.exe
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\net481\FuralityGridNode.pdb
