@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Windows.Forms;
 
@@ -196,6 +197,12 @@ namespace FuralityGridNode
                             index++;
                         }
                     }
+                } else
+                {
+                    var frigFile = new FRigFile();
+                    var frigBaseFile = FuralityGridNode.Properties.Resources.FrigBaseDebug;
+                    var frigBase = Encoding.UTF8.GetString(frigBaseFile);
+                    currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
                 }
             }
             if (output == null)

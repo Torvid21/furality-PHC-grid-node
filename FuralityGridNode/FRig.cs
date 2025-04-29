@@ -194,7 +194,7 @@ namespace FuralityGridNode
             }
         }
 
-        private FRigFile LoadFromJsonString(string json)
+        public FRigFile LoadFromJsonString(string json)
         {
             if (string.IsNullOrEmpty(json))
             {
