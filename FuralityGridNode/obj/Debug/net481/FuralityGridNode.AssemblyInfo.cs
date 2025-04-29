@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyCopyrightAttribute("Copyright ©  2024")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e4127d1b4ca136207f40de22307dcf8ddbd08ad7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f27bcdffa4720b775a00e371942459ee9e705c64")]
 [assembly: System.Reflection.AssemblyProductAttribute("FuralityGridNode")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FuralityGridNode")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
