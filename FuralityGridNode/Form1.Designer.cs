@@ -35,26 +35,25 @@ namespace FuralityGridNode
             this.helloToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configPanel = new System.Windows.Forms.Panel();
-            this.UnloadLayout = new System.Windows.Forms.Button();
-            this.LoadLayout = new System.Windows.Forms.Button();
-            this.GenerateLayout = new System.Windows.Forms.Button();
-            this.unicast = new System.Windows.Forms.CheckBox();
-            this.selectRig = new System.Windows.Forms.Button();
-            this.connect = new System.Windows.Forms.Button();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.colorTypeDropdown = new System.Windows.Forms.ComboBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.UnloadLayout = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.selectRig = new System.Windows.Forms.Button();
+            this.LoadLayout = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.statusLabel = new System.Windows.Forms.Label();
+            this.ipInput = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.portInput = new System.Windows.Forms.TextBox();
-            this.ipInput = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.unicast = new System.Windows.Forms.CheckBox();
+            this.connect = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.statusLabel = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.configPanel.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -88,68 +87,19 @@ namespace FuralityGridNode
             this.configPanel.Size = new System.Drawing.Size(328, 184);
             this.configPanel.TabIndex = 1;
             // 
-            // UnloadLayout
+            // groupBox2
             // 
-            this.UnloadLayout.Location = new System.Drawing.Point(6, 120);
-            this.UnloadLayout.Name = "UnloadLayout";
-            this.UnloadLayout.Size = new System.Drawing.Size(104, 23);
-            this.UnloadLayout.TabIndex = 13;
-            this.UnloadLayout.Text = "Unload Layout";
-            this.UnloadLayout.UseVisualStyleBackColor = true;
-            this.UnloadLayout.Click += new System.EventHandler(this.UnloadLayout_Click);
-            // 
-            // LoadLayout
-            // 
-            this.LoadLayout.Location = new System.Drawing.Point(6, 91);
-            this.LoadLayout.Name = "LoadLayout";
-            this.LoadLayout.Size = new System.Drawing.Size(104, 23);
-            this.LoadLayout.TabIndex = 12;
-            this.LoadLayout.Text = "Load Layout";
-            this.LoadLayout.UseVisualStyleBackColor = true;
-            this.LoadLayout.Click += new System.EventHandler(this.LoadLayout_Click);
-            // 
-            // GenerateLayout
-            // 
-            this.GenerateLayout.Location = new System.Drawing.Point(6, 149);
-            this.GenerateLayout.Name = "GenerateLayout";
-            this.GenerateLayout.Size = new System.Drawing.Size(104, 23);
-            this.GenerateLayout.TabIndex = 11;
-            this.GenerateLayout.Text = "Create Layout";
-            this.GenerateLayout.UseVisualStyleBackColor = true;
-            this.GenerateLayout.Click += new System.EventHandler(this.GenerateLayout_Click);
-            // 
-            // unicast
-            // 
-            this.unicast.AutoSize = true;
-            this.unicast.Checked = true;
-            this.unicast.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.unicast.Location = new System.Drawing.Point(6, 68);
-            this.unicast.Name = "unicast";
-            this.unicast.Size = new System.Drawing.Size(62, 17);
-            this.unicast.TabIndex = 11;
-            this.unicast.Text = "Unicast";
-            this.unicast.UseVisualStyleBackColor = true;
-            this.unicast.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
-            // selectRig
-            // 
-            this.selectRig.Location = new System.Drawing.Point(6, 62);
-            this.selectRig.Name = "selectRig";
-            this.selectRig.Size = new System.Drawing.Size(104, 23);
-            this.selectRig.TabIndex = 10;
-            this.selectRig.Text = "Select FRig";
-            this.selectRig.UseVisualStyleBackColor = true;
-            this.selectRig.Click += new System.EventHandler(this.selectRig_Click);
-            // 
-            // connect
-            // 
-            this.connect.Location = new System.Drawing.Point(6, 91);
-            this.connect.Name = "connect";
-            this.connect.Size = new System.Drawing.Size(75, 23);
-            this.connect.TabIndex = 9;
-            this.connect.Text = "Connect";
-            this.connect.UseVisualStyleBackColor = true;
-            this.connect.Click += new System.EventHandler(this.button1_Click);
+            this.groupBox2.Controls.Add(this.colorTypeDropdown);
+            this.groupBox2.Controls.Add(this.UnloadLayout);
+            this.groupBox2.Controls.Add(this.label3);
+            this.groupBox2.Controls.Add(this.selectRig);
+            this.groupBox2.Controls.Add(this.LoadLayout);
+            this.groupBox2.Location = new System.Drawing.Point(190, 3);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(135, 178);
+            this.groupBox2.TabIndex = 16;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Rig";
             // 
             // colorTypeDropdown
             // 
@@ -166,14 +116,79 @@ namespace FuralityGridNode
             this.colorTypeDropdown.SelectedIndexChanged += new System.EventHandler(this.colorTypeDropdown_SelectedIndexChanged);
             this.colorTypeDropdown.TextChanged += new System.EventHandler(this.inputChanged_TextChanged);
             // 
-            // label2
+            // UnloadLayout
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(55, 45);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(26, 13);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "Port";
+            this.UnloadLayout.Location = new System.Drawing.Point(6, 149);
+            this.UnloadLayout.Name = "UnloadLayout";
+            this.UnloadLayout.Size = new System.Drawing.Size(104, 23);
+            this.UnloadLayout.TabIndex = 13;
+            this.UnloadLayout.Text = "Unload Layout";
+            this.UnloadLayout.UseVisualStyleBackColor = true;
+            this.UnloadLayout.Click += new System.EventHandler(this.UnloadLayout_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(76, 22);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(31, 13);
+            this.label3.TabIndex = 14;
+            this.label3.Text = "Type";
+            this.label3.Click += new System.EventHandler(this.label3_Click);
+            // 
+            // selectRig
+            // 
+            this.selectRig.Location = new System.Drawing.Point(6, 91);
+            this.selectRig.Name = "selectRig";
+            this.selectRig.Size = new System.Drawing.Size(104, 23);
+            this.selectRig.TabIndex = 10;
+            this.selectRig.Text = "Select FRig";
+            this.selectRig.UseVisualStyleBackColor = true;
+            this.selectRig.Click += new System.EventHandler(this.selectRig_Click);
+            // 
+            // LoadLayout
+            // 
+            this.LoadLayout.Location = new System.Drawing.Point(6, 120);
+            this.LoadLayout.Name = "LoadLayout";
+            this.LoadLayout.Size = new System.Drawing.Size(104, 23);
+            this.LoadLayout.TabIndex = 12;
+            this.LoadLayout.Text = "Load Layout";
+            this.LoadLayout.UseVisualStyleBackColor = true;
+            this.LoadLayout.Click += new System.EventHandler(this.LoadLayout_Click);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.statusLabel);
+            this.groupBox1.Controls.Add(this.ipInput);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.portInput);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.unicast);
+            this.groupBox1.Controls.Add(this.connect);
+            this.groupBox1.Location = new System.Drawing.Point(6, 3);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(178, 178);
+            this.groupBox1.TabIndex = 15;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "ArtNet";
+            // 
+            // statusLabel
+            // 
+            this.statusLabel.AutoSize = true;
+            this.statusLabel.Location = new System.Drawing.Point(6, 159);
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(37, 13);
+            this.statusLabel.TabIndex = 12;
+            this.statusLabel.Text = "Status";
+            // 
+            // ipInput
+            // 
+            this.ipInput.Location = new System.Drawing.Point(6, 16);
+            this.ipInput.Name = "ipInput";
+            this.ipInput.Size = new System.Drawing.Size(89, 20);
+            this.ipInput.TabIndex = 0;
+            this.ipInput.Text = "127.0.0.1";
+            this.ipInput.TextChanged += new System.EventHandler(this.inputChanged_TextChanged);
             // 
             // label1
             // 
@@ -193,70 +208,43 @@ namespace FuralityGridNode
             this.portInput.Text = "6454";
             this.portInput.TextChanged += new System.EventHandler(this.inputChanged_TextChanged);
             // 
-            // ipInput
+            // label2
             // 
-            this.ipInput.Location = new System.Drawing.Point(6, 16);
-            this.ipInput.Name = "ipInput";
-            this.ipInput.Size = new System.Drawing.Size(89, 20);
-            this.ipInput.TabIndex = 0;
-            this.ipInput.Text = "127.0.0.1";
-            this.ipInput.TextChanged += new System.EventHandler(this.inputChanged_TextChanged);
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(55, 45);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(26, 13);
+            this.label2.TabIndex = 3;
+            this.label2.Text = "Port";
+            // 
+            // unicast
+            // 
+            this.unicast.AutoSize = true;
+            this.unicast.Checked = true;
+            this.unicast.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.unicast.Location = new System.Drawing.Point(6, 68);
+            this.unicast.Name = "unicast";
+            this.unicast.Size = new System.Drawing.Size(62, 17);
+            this.unicast.TabIndex = 11;
+            this.unicast.Text = "Unicast";
+            this.unicast.UseVisualStyleBackColor = true;
+            this.unicast.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
+            // connect
+            // 
+            this.connect.Location = new System.Drawing.Point(6, 91);
+            this.connect.Name = "connect";
+            this.connect.Size = new System.Drawing.Size(75, 23);
+            this.connect.TabIndex = 9;
+            this.connect.Text = "Connect";
+            this.connect.UseVisualStyleBackColor = true;
+            this.connect.Click += new System.EventHandler(this.button1_Click);
             // 
             // timer1
             // 
             this.timer1.Enabled = true;
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.statusLabel);
-            this.groupBox1.Controls.Add(this.ipInput);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.portInput);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.unicast);
-            this.groupBox1.Controls.Add(this.connect);
-            this.groupBox1.Location = new System.Drawing.Point(6, 3);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(178, 178);
-            this.groupBox1.TabIndex = 15;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "ArtNet";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.colorTypeDropdown);
-            this.groupBox2.Controls.Add(this.GenerateLayout);
-            this.groupBox2.Controls.Add(this.UnloadLayout);
-            this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Controls.Add(this.selectRig);
-            this.groupBox2.Controls.Add(this.LoadLayout);
-            this.groupBox2.Location = new System.Drawing.Point(190, 3);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(135, 178);
-            this.groupBox2.TabIndex = 16;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Rig";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(76, 22);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(31, 13);
-            this.label3.TabIndex = 14;
-            this.label3.Text = "Type";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
-            // 
-            // statusLabel
-            // 
-            this.statusLabel.AutoSize = true;
-            this.statusLabel.Location = new System.Drawing.Point(6, 159);
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(37, 13);
-            this.statusLabel.TabIndex = 12;
-            this.statusLabel.Text = "Status";
             // 
             // Form1
             // 
@@ -274,10 +262,10 @@ namespace FuralityGridNode
             this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.configPanel.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -297,7 +285,6 @@ namespace FuralityGridNode
         private System.Windows.Forms.Button connect;
         private System.Windows.Forms.Button selectRig;
         private System.Windows.Forms.Button LoadLayout;
-        private System.Windows.Forms.Button GenerateLayout;
         private System.Windows.Forms.Button UnloadLayout;
         private System.Windows.Forms.CheckBox unicast;
         private System.Windows.Forms.GroupBox groupBox2;

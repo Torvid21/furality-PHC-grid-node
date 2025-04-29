@@ -143,9 +143,12 @@ namespace FuralityGridNode
 
                         if (customLayout)
                         {
+                            if (channel >= layoutMapping.Count)
+                                continue;
                             x = layoutMapping[channel].x;
                             y = layoutMapping[channel].y;
                         }
+                        
                         DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, data, data, data);
                     }
                 }
@@ -162,6 +165,8 @@ namespace FuralityGridNode
                     int y = channel % countY;
                     if (customLayout)
                     {
+                        if (channel >= layoutMapping.Count)
+                            continue;
                         x = layoutMapping[channel].x;
                         y = layoutMapping[channel].y;
                     }
@@ -181,6 +186,8 @@ namespace FuralityGridNode
                             int gridY = fixture.GridChannel % countY;
                             if (customLayout)
                             {
+                                if (fixture.GridChannel >= layoutMapping.Count)
+                                    continue;
                                 gridX = layoutMapping[fixture.GridChannel].x;
                                 gridY = layoutMapping[fixture.GridChannel].y;
                             }
@@ -374,22 +381,25 @@ namespace FuralityGridNode
         }
 
 
+
+        [Serializable]
         struct DMXCoord
         {
             public float uvX;
             public float uvY;
             public int dmxX;
             public int dmxY;
-            public int universe;
-            public int universe_channel;
             public int channel;
         }
+
+        [Serializable]
         class DMXLayout
         {
             public int resolutionX;
             public int resolutionY;
             public int dmxSizeX;
             public int dmxSizeY;
+            public int channelCount;
             public List<DMXCoord> coords = new List<DMXCoord>();
         }
 
@@ -423,8 +433,7 @@ namespace FuralityGridNode
             layout.dmxSizeX = DmxX;
             layout.dmxSizeY = DmxY;
 
-            int FilledPixelCount = 0;
-            int DmxChannel = 0;
+            int channelCount = 0;
             for (int x = 0; x < DmxX; x++)
             {
                 for (int y = 0; y < DmxY; y++)
@@ -457,12 +466,10 @@ namespace FuralityGridNode
                         float tX = (x * 16 + 8) / (float)sizeX;
                         float tY = (y * 16 + 8) / (float)sizeY;
                         layout.coords.Add(new DMXCoord { uvX = tX, uvY = tY, dmxX = x, dmxY = y, 
-                            channel = DmxChannel, 
-                            universe = DmxChannel / 512,
-                            universe_channel = DmxChannel % 512
+                            channel = channelCount, 
                         });
 
-                        FilledPixelCount++;
+                        channelCount++;
                     }
                     for (int X = 0; X < 16; X++)
                     {
@@ -495,9 +502,9 @@ namespace FuralityGridNode
                         //}
                         }
                     }
-                    DmxChannel++;
                 }
             }
+            layout.channelCount = channelCount;
 
             string json = JsonSerializer.Serialize(layout, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
 
@@ -505,7 +512,6 @@ namespace FuralityGridNode
             string name = Path.GetFileNameWithoutExtension(f2.FileName);
             string dir = Path.GetDirectoryName(f2.FileName);
             Utils.WritePng(dir + "\\" + name + "_mask.png", data, sizeX, sizeY);
-
         }
 
         Dictionary<int, (int x, int y)> layoutMapping;
