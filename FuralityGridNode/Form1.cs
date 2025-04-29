@@ -502,7 +502,9 @@ namespace FuralityGridNode
             string json = JsonSerializer.Serialize(layout, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
 
             File.WriteAllText(f2.FileName, json);
-            Utils.WritePng(Path.ChangeExtension(f2.FileName + "_mask", ".png"), data, sizeX, sizeY);
+            string name = Path.GetFileNameWithoutExtension(f2.FileName);
+            string dir = Path.GetDirectoryName(f2.FileName);
+            Utils.WritePng(dir + "\\" + name + "_mask.png", data, sizeX, sizeY);
 
         }
 
