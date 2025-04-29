@@ -1,4 +1,6 @@
-﻿namespace FuralityGridNode
+﻿using System.Media;
+
+namespace FuralityGridNode
 {
     partial class Form1
     {
@@ -33,6 +35,8 @@
             this.helloToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configPanel = new System.Windows.Forms.Panel();
+            this.selectRig = new System.Windows.Forms.Button();
+            this.connect = new System.Windows.Forms.Button();
             this.statusLabel = new System.Windows.Forms.Label();
             this.colorTypeDropdown = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -69,6 +73,8 @@
             // 
             // configPanel
             // 
+            this.configPanel.Controls.Add(this.selectRig);
+            this.configPanel.Controls.Add(this.connect);
             this.configPanel.Controls.Add(this.statusLabel);
             this.configPanel.Controls.Add(this.colorTypeDropdown);
             this.configPanel.Controls.Add(this.label3);
@@ -80,6 +86,26 @@
             this.configPanel.Name = "configPanel";
             this.configPanel.Size = new System.Drawing.Size(165, 184);
             this.configPanel.TabIndex = 1;
+            // 
+            // selectRig
+            // 
+            this.selectRig.Location = new System.Drawing.Point(6, 151);
+            this.selectRig.Name = "selectRig";
+            this.selectRig.Size = new System.Drawing.Size(75, 23);
+            this.selectRig.TabIndex = 10;
+            this.selectRig.Text = "Select FRig";
+            this.selectRig.UseVisualStyleBackColor = true;
+            this.selectRig.Click += new System.EventHandler(this.selectRig_Click);
+            // 
+            // connect
+            // 
+            this.connect.Location = new System.Drawing.Point(3, 121);
+            this.connect.Name = "connect";
+            this.connect.Size = new System.Drawing.Size(75, 23);
+            this.connect.TabIndex = 9;
+            this.connect.Text = "Connect";
+            this.connect.UseVisualStyleBackColor = true;
+            this.connect.Click += new System.EventHandler(this.button1_Click);
             // 
             // statusLabel
             // 
@@ -95,12 +121,13 @@
             this.colorTypeDropdown.FormattingEnabled = true;
             this.colorTypeDropdown.Items.AddRange(new object[] {
             "VRSL",
-            "Packed"});
+            "Packed",
+            "FRig"});
             this.colorTypeDropdown.Location = new System.Drawing.Point(3, 81);
             this.colorTypeDropdown.Name = "colorTypeDropdown";
             this.colorTypeDropdown.Size = new System.Drawing.Size(100, 21);
             this.colorTypeDropdown.TabIndex = 7;
-            this.colorTypeDropdown.Text = "VRSL";
+            this.colorTypeDropdown.Text = "FRig";
             this.colorTypeDropdown.SelectedIndexChanged += new System.EventHandler(this.colorTypeDropdown_SelectedIndexChanged);
             this.colorTypeDropdown.TextChanged += new System.EventHandler(this.inputChanged_TextChanged);
             // 
@@ -190,6 +217,8 @@
         private System.Windows.Forms.ComboBox colorTypeDropdown;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.Label statusLabel;
+        private System.Windows.Forms.Button connect;
+        private System.Windows.Forms.Button selectRig;
     }
 }
 

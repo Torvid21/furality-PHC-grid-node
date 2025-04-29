@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace FuralityGridNode
@@ -14,9 +12,14 @@ namespace FuralityGridNode
         [STAThread]
         static void Main()
         {
+            Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
+            Trace.AutoFlush = true;
+            Trace.Indent();
+            Trace.WriteLine("Entering Main");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
+            Trace.Unindent();
         }
     }
 }

@@ -1,0 +1,22 @@
+[
+  {
+    "Name": "Debug",
+    "Projects": [
+      {
+        "Path": "FuralityGridNode\\FuralityGridNode.csproj",
+        "Action": "Start",
+        "DebugTarget": "FuralityGridNode"
+      }
+    ]
+  },
+  {
+    "Name": "Release",
+    "Projects": [
+      {
+        "Path": "FuralityGridNode\\FuralityGridNode.csproj",
+        "Action": "StartWithoutDebugging",
+        "DebugTarget": "FuralityGridNode"
+      }
+    ]
+  }
+]

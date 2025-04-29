@@ -8,3 +8,13 @@ C:\Users\Stinger\Dropbox\Stinger\projects\furality\FuralityArtNet\FuralityGridNo
 C:\Users\Stinger\Dropbox\Stinger\projects\furality\FuralityArtNet\FuralityGridNode\FuralityGridNode\obj\Debug\FuralityGridNode.csproj.CoreCompileInputs.cache
 C:\Users\Stinger\Dropbox\Stinger\projects\furality\FuralityArtNet\FuralityGridNode\FuralityGridNode\obj\Debug\FuralityGridNode.exe
 C:\Users\Stinger\Dropbox\Stinger\projects\furality\FuralityArtNet\FuralityGridNode\FuralityGridNode\obj\Debug\FuralityGridNode.pdb
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\FuralityGridNode.exe.config
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\FuralityGridNode.exe
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\bin\Debug\FuralityGridNode.pdb
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\FuralityGridNode.csproj.AssemblyReference.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\FuralityGridNode.Form1.resources
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\FuralityGridNode.Properties.Resources.resources
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\FuralityGridNode.csproj.GenerateResource.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\FuralityGridNode.csproj.CoreCompileInputs.cache
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\FuralityGridNode.exe
+A:\Unity\World\Furality\furality-grid-node\FuralityGridNode\obj\Debug\FuralityGridNode.pdb

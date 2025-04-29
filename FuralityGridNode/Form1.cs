@@ -1,19 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace FuralityGridNode
@@ -23,6 +11,9 @@ namespace FuralityGridNode
         static int size = 16;
         static int countY = 13;
         static int countX = (512 / countY + 1);
+
+        private ArtNet artnetClient;
+
         //static Bitmap bmp;
 
         public Form1()
@@ -101,54 +92,7 @@ namespace FuralityGridNode
         }
         public static Graphics g;
         public static Form1 form;
-        static byte[] combinedData = new byte[512*8];
-
-        static int listenPort = 6454;
-        static IPAddress listenAddress = IPAddress.Loopback;
-        static UdpClient listener;
-        static Thread listenerThread;
-        private static void StartListener()
-        {
-            statusText = "listener started";
-            if (listener != null)
-                listener.Close();
-            try
-            {
-                listener = new UdpClient(listenPort);
-            }
-            catch(Exception e)
-            {
-                statusText = e.Message;
-                return;
-            }
-            
-            IPEndPoint groupEP = new IPEndPoint(listenAddress, listenPort);
-
-            while (true)
-            {
-                if (listenAddress == null)
-                    return;
-
-                statusText = "listening on " + listenAddress.ToString() + ":" + listenPort;
-                byte[] bytes = listener.Receive(ref groupEP);
-
-                int opcode = (bytes[8 + 1] << 8) | bytes[8 + 0];
-                if (opcode == 0x5000)
-                {
-                    int universe = (bytes[12 + 3] << 8) | bytes[12 + 2];
-                    if (universe < 8)
-                    {
-                        for (int i = 0; i < 512; i++)
-                        {
-                            combinedData[i + universe * 512] = bytes[i + 18];
-                        }
-                        update = true;
-                    }
-                }
-            }
-
-            listener.Close();
-        }
+        static byte[] combinedData = new byte[512 * 8];
 
         static bool update = false;
         static string statusText = "";
@@ -161,20 +105,24 @@ namespace FuralityGridNode
                 for (int y = Y; y < Y + sizeY; y++)
                 {
                     int index = (x + y * dataSizeX) * 3;
-                    data[index + 0] = B; // B
-                    data[index + 1] = G;
-                    data[index + 2] = R;
+                    data[index + 0] = B; // R
+                    data[index + 1] = G; // G
+                    data[index + 2] = R; // B
                 }
             }
         }
 
         public void DrawData()
         {
-            int sizeX = countX * 16 * 3;
-            int sizeY = countY * 16;
+            combinedData = artnetClient.combinedData;
+            int sizeX = countX * size * 3;
+            int sizeY = countY * size;
             byte[] output = new byte[sizeX * sizeY * 3];
 
             string selectedItem = colorTypeDropdown.SelectedItem as string;
+#if DEBUG
+            //selectedItem = "FRig";
+#endif
 
             if (selectedItem == "VRSL")
             {
@@ -185,13 +133,13 @@ namespace FuralityGridNode
                         byte data = combinedData[i + universe * 512];
                         int x = i / 13;
                         int y = i % 13;
-                        DrawSquare(output, sizeX, sizeY, (x + universe * countX) * 16, y * 16, 16, 16, data, data, data);
+                        DrawSquare(output, sizeX, sizeY, (x + universe * countX) * size, y * size, size, size, data, data, data);
                     }
                 }
             }
             else if (selectedItem == "Packed")
             {
-                for (int i = 0; i < ((512*8) / 3); i++)
+                for (int i = 0; i < ((512 * 8) / 3); i++)
                 {
                     byte dataR = combinedData[i * 3 + 0];
                     byte dataG = combinedData[i * 3 + 1];
@@ -199,7 +147,33 @@ namespace FuralityGridNode
 
                     int x = i / 13;
                     int y = i % 13;
-                    DrawSquare(output, sizeX, sizeY, x * 16, y * 16, 16, 16, dataR, dataG, dataB);
+                    DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, dataR, dataG, dataB);
+                }
+            }
+            else
+            {
+                if (currentRig != null)
+                {
+                    if (currentRig != null && currentRig.Fixtures != null)
+                    {
+                        int index = 0;
+                        foreach (Fixture fixture in currentRig.Fixtures)
+                        {
+                            int gridX = fixture.GridChannel / countY;
+                            int gridY = fixture.GridChannel % countY;
+
+                            int pixelX = gridX * size;
+                            int pixelY = gridY * size;
+
+                            byte data = combinedData[fixture.UnityChannel - 1];
+
+                            int color = fixture.GridColor;
+
+                            DrawColorSquare(output, sizeX, sizeY, pixelX, pixelY, size, size, data, fixture.GridColor);
+
+                            index++;
+                        }
+                    }
                 }
             }
             if (output == null)
@@ -225,35 +199,42 @@ namespace FuralityGridNode
             pinnedArray.Free();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void DrawColorSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte dataIn, int selector)
         {
-            RestartClient();
+            for (int x = X; x < X + sizeX; x++)
+            {
+                for (int y = Y; y < Y + sizeY; y++)
+                {
+                    int index = (x + y * dataSizeX) * 3;
+                    switch (selector) {
+                        case 1:
+                            data[index + 2] = dataIn; // R
+                            break;
+                        case 2:
+                            data[index + 1] = dataIn; // G
+                            break;
+                        case 3:
+                            data[index + 0] = dataIn; // B
+                            break;
+                        default:
+                            data[index + 2] = dataIn; // R
+                            data[index + 1] = dataIn; // G
+                            data[index + 0] = dataIn; // B
+                            break;
+                    }
+                }
+            }
         }
 
-        void RestartClient()
+        private void Form1_Load(object sender, EventArgs e)
         {
-            statusText = "listener starting";
+            StartArtNetClient();
+        }
 
-            int.TryParse(portInput.Text, out listenPort);
-            IPAddress.TryParse(ipInput.Text, out listenAddress);
-
-            if (listenAddress == null)
-            {
-                statusText = "invalid IP";
-                return;
-            }
-
-            if (listenPort == 0)
-            {
-                statusText = "invalid Port";
-                return;
-            }
-
-            if (listenerThread != null)
-                listenerThread.Abort();
-
-            listenerThread = new Thread(new ThreadStart(StartListener));
-            listenerThread.Start();
+        void StartArtNetClient()
+        {
+            artnetClient = new ArtNet(ipInput.Text, portInput.Text);
+            artnetClient.StartClient();
         }
 
         private void Config_Click(object sender, EventArgs e)
@@ -265,6 +246,18 @@ namespace FuralityGridNode
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+#if DEBUG
+           //Trace.WriteLine($"ArtNet Status: {artnetClient.status}");
+#endif
+            if (artnetClient.status == ArtNet.ArtNetClientStatus.Waiting)
+                update = true;
+            if (artnetClient.status == ArtNet.ArtNetClientStatus.ReceivingData)
+                update = true;
+            if (artnetClient.status != ArtNet.ArtNetClientStatus.Disconnected)
+                update = true;
+            if (artnetClient.status != ArtNet.ArtNetClientStatus.Error)
+                update = true;
+
             if (update)
             {
                 update = false;
@@ -276,6 +269,7 @@ namespace FuralityGridNode
                 statusLabel.Text = statusText;
                 statusTextLast = statusText;
             }
+            statusLabel.Text = artnetClient.status.ToString();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -295,8 +289,60 @@ namespace FuralityGridNode
 
         private void inputChanged_TextChanged(object sender, EventArgs e)
         {
-            RestartClient();
             DrawData();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Trace.WriteLine("Button1 Clicked");
+            artnetClient.RestartClient();
+            //RestartClient();
+            //StartArtNetClient();
+        }
+
+        private void selectRig_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "FRig Files (*.frig)|*.frig|All Files (*.*)|*.*";
+                openFileDialog.Title = "Select FRig File";
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    string filePath = openFileDialog.FileName;
+#if DEBUG
+                    Trace.WriteLine($"Yay it found the file, path: {filePath}");
+#endif
+                    LoadFRigFile(filePath);
+                }
+            }
+        }
+
+        private FRig currentRig;
+
+        private void LoadFRigFile(string filePath)
+        {
+            try
+            {
+                // Use the static FromJson method here too for consistency and error handling
+                FRigFile frigFile = new FRigFile();
+                frigFile = frigFile.LoadFromFile(filePath);
+                currentRig = frigFile.ConvertToFRig();
+                if (currentRig != null)
+                {
+                    Trace.WriteLine($"FRig file loaded");
+                    if (currentRig.Fixtures != null)
+                        Trace.WriteLine($"FRig fixtures loaded successfully. Version: Micca Broke it, Fixtures: {currentRig.Fixtures.Length}");
+                } else {
+                     Trace.WriteLine($"Failed to load FRig file: {filePath}");
+                     // Optionally show a MessageBox error here as well
+                }
+            }
+            catch (Exception ex)
+            {
+                // Catch potential File IO errors or other unexpected exceptions
+                MessageBox.Show($"Error loading FRig file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                currentRig = null; // Ensure rig is null on error
+            }
         }
     }
 }

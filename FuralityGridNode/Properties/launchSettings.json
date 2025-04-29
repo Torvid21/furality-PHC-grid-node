@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "FuralityGridNode": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
