@@ -56,6 +56,11 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <PlatformTarget>x64</PlatformTarget>
+    <Title>Furality Grid Node</Title>
+    <PackageIcon>FynnGridNode.jpeg</PackageIcon>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackAsTool>True</PackAsTool>
+    <ApplicationIcon>FynnGridNode.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Data.DataSetExtensions" />
@@ -80,6 +85,7 @@
     <Compile Update="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -95,6 +101,9 @@
     <Compile Remove="obj\x64\Debug\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="FynnGridNode.ico" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -105,5 +114,15 @@
     </PackageReference>
     <PackageReference Include="ModelContextProtocol" Version="0.1.0-preview.10" />
     <PackageReference Include="System.Text.Json" Version="9.0.4" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="FynnGridNode.jpeg">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="FynnGridNode.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>
