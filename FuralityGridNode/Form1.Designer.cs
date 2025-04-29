@@ -47,7 +47,11 @@ namespace FuralityGridNode
             this.portInput = new System.Windows.Forms.TextBox();
             this.ipInput = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+<<<<<<< HEAD
             this.UnloadLayout = new System.Windows.Forms.Button();
+=======
+            this.unicast = new System.Windows.Forms.CheckBox();
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
             this.contextMenuStrip1.SuspendLayout();
             this.configPanel.SuspendLayout();
             this.SuspendLayout();
@@ -76,9 +80,13 @@ namespace FuralityGridNode
             // 
             // configPanel
             // 
+<<<<<<< HEAD
             this.configPanel.Controls.Add(this.UnloadLayout);
             this.configPanel.Controls.Add(this.LoadLayout);
             this.configPanel.Controls.Add(this.GenerateLayout);
+=======
+            this.configPanel.Controls.Add(this.unicast);
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
             this.configPanel.Controls.Add(this.selectRig);
             this.configPanel.Controls.Add(this.connect);
             this.configPanel.Controls.Add(this.statusLabel);
@@ -115,7 +123,7 @@ namespace FuralityGridNode
             // 
             // selectRig
             // 
-            this.selectRig.Location = new System.Drawing.Point(6, 151);
+            this.selectRig.Location = new System.Drawing.Point(3, 150);
             this.selectRig.Name = "selectRig";
             this.selectRig.Size = new System.Drawing.Size(75, 23);
             this.selectRig.TabIndex = 10;
@@ -208,6 +216,7 @@ namespace FuralityGridNode
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+<<<<<<< HEAD
             // UnloadLayout
             // 
             this.UnloadLayout.Location = new System.Drawing.Point(221, 121);
@@ -217,6 +226,20 @@ namespace FuralityGridNode
             this.UnloadLayout.Text = "Unload Layout";
             this.UnloadLayout.UseVisualStyleBackColor = true;
             this.UnloadLayout.Click += new System.EventHandler(this.UnloadLayout_Click);
+=======
+            // unicast
+            // 
+            this.unicast.AutoSize = true;
+            this.unicast.Checked = true;
+            this.unicast.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.unicast.Location = new System.Drawing.Point(84, 138);
+            this.unicast.Name = "unicast";
+            this.unicast.Size = new System.Drawing.Size(62, 17);
+            this.unicast.TabIndex = 11;
+            this.unicast.Text = "Unicast";
+            this.unicast.UseVisualStyleBackColor = true;
+            this.unicast.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
             // 
             // Form1
             // 
@@ -255,9 +278,13 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.Button connect;
         private System.Windows.Forms.Button selectRig;
+<<<<<<< HEAD
         private System.Windows.Forms.Button LoadLayout;
         private System.Windows.Forms.Button GenerateLayout;
         private System.Windows.Forms.Button UnloadLayout;
+=======
+        private System.Windows.Forms.CheckBox unicast;
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
     }
 }
 

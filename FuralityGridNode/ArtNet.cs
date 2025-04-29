@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Channels;
 
 namespace FuralityGridNode
 {
@@ -12,10 +11,11 @@ namespace FuralityGridNode
         public byte[] combinedData = new byte[512 * 8];
 
         private static int listenPort = 6454;
-        private static IPAddress listenAddress = IPAddress.Loopback;
+        private static IPAddress listenAddress = IPAddress.Parse("2.0.0.2");
         private static UdpClient listener;
         public static Thread listenerThread;
         private static bool started = false;
+        public bool Unicast;
 
         private static bool alive = false;
 
@@ -49,11 +49,19 @@ namespace FuralityGridNode
             ReceivedData,
         }
 
+<<<<<<< HEAD
+=======
+        public void HaukcodeClient()
+        {
+            //var channel = Channel.CreateUnbounded<>();
+        }
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
 
 
         public string ErrorMessage = "";
 
         public ArtNetClientStatus status = ArtNetClientStatus.Disconnected;
+
 
         public void StartClient()
         {
@@ -79,14 +87,16 @@ namespace FuralityGridNode
 
             alive = true;
             listenerThread = new Thread(
-                () => StartListener(out status, ref combinedData)
+                () => StartListener(out status, ref combinedData, this.Unicast)
             );
             listenerThread.Start();
         }
 
-        public void RestartClient()
+        public void RestartClient(string ip, string port)
         {
             ErrorMessage = "";
+            IPAddress.TryParse(ip, out listenAddress);
+            int.TryParse(port, out listenPort);
 #if DEBUG
             Trace.WriteLine($"Restarting Client: {alive} {started} {status.ToString()}");
 #endif
@@ -115,12 +125,12 @@ namespace FuralityGridNode
 
             alive = true;
             listenerThread = new Thread(
-                () => StartListener(out status, ref combinedData)
+                () => StartListener(out status, ref combinedData, this.Unicast)
             );
             listenerThread.Start();
         }
 
-        public static void StartListener(out ArtNetClientStatus status, ref byte[] data)
+        public static void StartListener(out ArtNetClientStatus status, ref byte[] data, bool unicast)
         {
 #if DEBUG
             Trace.WriteLine($"Start Listening: {alive}");
@@ -148,24 +158,32 @@ namespace FuralityGridNode
                 Trace.WriteLine("ArtNetClient: Closing Listener");
             }
 
-            //IPEndPoint remoteEndPoint = new IPEndPoint(listenAddress, listenPort);
             IPEndPoint remoteEndPoint = new IPEndPoint(listenAddress, listenPort);
 
             try
             {
-                listener = new UdpClient(port: listenPort) { MulticastLoopback = true };
-                status = ArtNetClientStatus.Connected;
-                Trace.WriteLine("ArtNetClient: Listener started");
+                if (unicast)
+                {
+                    listener = new UdpClient(AddressFamily.InterNetwork);
+                    listener.ExclusiveAddressUse = false;
+                    listener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    listener.Client.Bind(remoteEndPoint);
+                    status = ArtNetClientStatus.Connected;
+                    Trace.WriteLine("ArtNetClient: Listener started");
+                } else
+                {
+                    listener = new UdpClient(listenPort);
+                    status = ArtNetClientStatus.Connected;
+                    Trace.WriteLine("ArtNetClient: Listener started");
+                }
             }
             catch (Exception e)
             {
                 status = ArtNetClientStatus.Error;
-                Trace.WriteLine($"ArtNetException: ${e.Message}");
+                Trace.WriteLine($"ArtNetException: {e.Message}");
                 return;
             }
 
-            //try
-            //{
             while (true)
             {
                 if (listenAddress == null)

@@ -2,7 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+<<<<<<< HEAD
 using System.IO;
+=======
+using System.Net;
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Windows.Forms;
@@ -14,7 +18,12 @@ namespace FuralityGridNode
         static int size = 16;
         static int countY = 13;
         static int countX = (512 / countY + 1);
+<<<<<<< HEAD
         static bool customLayout;
+=======
+        static bool unicastCheck = true;
+
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
         private ArtNet artnetClient;
 
         //static Bitmap bmp;
@@ -253,6 +262,7 @@ namespace FuralityGridNode
         void StartArtNetClient()
         {
             artnetClient = new ArtNet(ipInput.Text, portInput.Text);
+            artnetClient.Unicast = unicastCheck;
             artnetClient.StartClient();
         }
 
@@ -314,7 +324,8 @@ namespace FuralityGridNode
         private void button1_Click(object sender, EventArgs e)
         {
             Trace.WriteLine("Button1 Clicked");
-            artnetClient.RestartClient();
+            artnetClient.Unicast = unicastCheck;
+            artnetClient.RestartClient(ipInput.Text, portInput.Text);
             //RestartClient();
             //StartArtNetClient();
         }
@@ -364,6 +375,7 @@ namespace FuralityGridNode
             }
         }
 
+<<<<<<< HEAD
 
         private void PackDMX_Click(object sender, EventArgs e)
         {
@@ -536,6 +548,12 @@ namespace FuralityGridNode
             countY = 13;
             countX = (512 / countY + 1);
             this.Size = new Size(1920, 208);
+=======
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+            unicastCheck = checkBox.Checked;
+>>>>>>> c16bbab7f48ea8719aabad58b0d06b26e7d4ac96
         }
     }
 }
