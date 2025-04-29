@@ -12,7 +12,7 @@ namespace FuralityGridNode
         public byte[] combinedData = new byte[512 * 8];
 
         private static int listenPort = 6454;
-        private static IPAddress listenAddress = IPAddress.Loopback;
+        private static IPAddress listenAddress = IPAddress.Parse("2.0.0.2");
         private static UdpClient listener;
         public static Thread listenerThread;
         private static bool started = false;
@@ -51,7 +51,7 @@ namespace FuralityGridNode
 
         public void HaukcodeClient()
         {
-            var channel = Channel.CreateUnbounded<>();
+            //var channel = Channel.CreateUnbounded<>();
         }
 
 
@@ -88,9 +88,11 @@ namespace FuralityGridNode
             listenerThread.Start();
         }
 
-        public void RestartClient()
+        public void RestartClient(string ip, string port)
         {
             ErrorMessage = "";
+            IPAddress.TryParse(ip, out listenAddress);
+            int.TryParse(port, out listenPort);
 #if DEBUG
             Trace.WriteLine($"Restarting Client: {alive} {started} {status.ToString()}");
 #endif
@@ -155,18 +157,21 @@ namespace FuralityGridNode
             //IPEndPoint remoteEndPoint = new IPEndPoint(listenAddress, listenPort);
             IPEndPoint remoteEndPoint = new IPEndPoint(listenAddress, listenPort);
 
-            try
-            {
-                listener = new UdpClient(port: listenPort) { MulticastLoopback = true };
+            //try
+            //{
+                listener = new UdpClient(AddressFamily.InterNetwork);
+                listener.ExclusiveAddressUse = false;
+                listener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                listener.Client.Bind(remoteEndPoint);
                 status = ArtNetClientStatus.Connected;
                 Trace.WriteLine("ArtNetClient: Listener started");
-            }
-            catch (Exception e)
-            {
-                status = ArtNetClientStatus.Error;
-                Trace.WriteLine($"ArtNetException: ${e.Message}");
-                return;
-            }
+            //}
+            //catch (Exception e)
+            //{
+                //status = ArtNetClientStatus.Error;
+                //Trace.WriteLine($"ArtNetException: ${e.Message}");
+                //return;
+            //}
 
             //try
             //{
