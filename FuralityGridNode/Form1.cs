@@ -12,6 +12,7 @@ namespace FuralityGridNode
         static int size = 16;
         static int countY = 13;
         static int countX = (512 / countY + 1);
+        static bool unicastCheck = true;
 
         private ArtNet artnetClient;
 
@@ -235,6 +236,7 @@ namespace FuralityGridNode
         void StartArtNetClient()
         {
             artnetClient = new ArtNet(ipInput.Text, portInput.Text);
+            artnetClient.Unicast = unicastCheck;
             artnetClient.StartClient();
         }
 
@@ -296,6 +298,7 @@ namespace FuralityGridNode
         private void button1_Click(object sender, EventArgs e)
         {
             Trace.WriteLine("Button1 Clicked");
+            artnetClient.Unicast = unicastCheck;
             artnetClient.RestartClient(ipInput.Text, portInput.Text);
             //RestartClient();
             //StartArtNetClient();
@@ -344,6 +347,12 @@ namespace FuralityGridNode
                 MessageBox.Show($"Error loading FRig file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 currentRig = null; // Ensure rig is null on error
             }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+            unicastCheck = checkBox.Checked;
         }
     }
 }

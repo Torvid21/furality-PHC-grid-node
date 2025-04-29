@@ -15,6 +15,7 @@ namespace FuralityGridNode
         private static UdpClient listener;
         public static Thread listenerThread;
         private static bool started = false;
+        public bool Unicast;
 
         private static bool alive = false;
 
@@ -58,6 +59,7 @@ namespace FuralityGridNode
 
         public ArtNetClientStatus status = ArtNetClientStatus.Disconnected;
 
+
         public void StartClient()
         {
             ErrorMessage = "";
@@ -82,7 +84,7 @@ namespace FuralityGridNode
 
             alive = true;
             listenerThread = new Thread(
-                () => StartListener(out status, ref combinedData)
+                () => StartListener(out status, ref combinedData, this.Unicast)
             );
             listenerThread.Start();
         }
@@ -120,12 +122,12 @@ namespace FuralityGridNode
 
             alive = true;
             listenerThread = new Thread(
-                () => StartListener(out status, ref combinedData)
+                () => StartListener(out status, ref combinedData, this.Unicast)
             );
             listenerThread.Start();
         }
 
-        public static void StartListener(out ArtNetClientStatus status, ref byte[] data)
+        public static void StartListener(out ArtNetClientStatus status, ref byte[] data, bool unicast)
         {
 #if DEBUG
             Trace.WriteLine($"Start Listening: {alive}");
@@ -153,27 +155,32 @@ namespace FuralityGridNode
                 Trace.WriteLine("ArtNetClient: Closing Listener");
             }
 
-            //IPEndPoint remoteEndPoint = new IPEndPoint(listenAddress, listenPort);
             IPEndPoint remoteEndPoint = new IPEndPoint(listenAddress, listenPort);
 
-            //try
-            //{
-                listener = new UdpClient(AddressFamily.InterNetwork);
-                listener.ExclusiveAddressUse = false;
-                listener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                listener.Client.Bind(remoteEndPoint);
-                status = ArtNetClientStatus.Connected;
-                Trace.WriteLine("ArtNetClient: Listener started");
-            //}
-            //catch (Exception e)
-            //{
-                //status = ArtNetClientStatus.Error;
-                //Trace.WriteLine($"ArtNetException: ${e.Message}");
-                //return;
-            //}
+            try
+            {
+                if (unicast)
+                {
+                    listener = new UdpClient(AddressFamily.InterNetwork);
+                    listener.ExclusiveAddressUse = false;
+                    listener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    listener.Client.Bind(remoteEndPoint);
+                    status = ArtNetClientStatus.Connected;
+                    Trace.WriteLine("ArtNetClient: Listener started");
+                } else
+                {
+                    listener = new UdpClient(listenPort);
+                    status = ArtNetClientStatus.Connected;
+                    Trace.WriteLine("ArtNetClient: Listener started");
+                }
+            }
+            catch (Exception e)
+            {
+                status = ArtNetClientStatus.Error;
+                Trace.WriteLine($"ArtNetException: {e.Message}");
+                return;
+            }
 
-            //try
-            //{
             while (true)
             {
                 if (listenAddress == null)

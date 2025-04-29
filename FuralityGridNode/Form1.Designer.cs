@@ -45,6 +45,7 @@ namespace FuralityGridNode
             this.portInput = new System.Windows.Forms.TextBox();
             this.ipInput = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.unicast = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             this.configPanel.SuspendLayout();
             this.SuspendLayout();
@@ -73,6 +74,7 @@ namespace FuralityGridNode
             // 
             // configPanel
             // 
+            this.configPanel.Controls.Add(this.unicast);
             this.configPanel.Controls.Add(this.selectRig);
             this.configPanel.Controls.Add(this.connect);
             this.configPanel.Controls.Add(this.statusLabel);
@@ -89,7 +91,7 @@ namespace FuralityGridNode
             // 
             // selectRig
             // 
-            this.selectRig.Location = new System.Drawing.Point(6, 151);
+            this.selectRig.Location = new System.Drawing.Point(3, 150);
             this.selectRig.Name = "selectRig";
             this.selectRig.Size = new System.Drawing.Size(75, 23);
             this.selectRig.TabIndex = 10;
@@ -182,6 +184,19 @@ namespace FuralityGridNode
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // unicast
+            // 
+            this.unicast.AutoSize = true;
+            this.unicast.Checked = true;
+            this.unicast.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.unicast.Location = new System.Drawing.Point(84, 138);
+            this.unicast.Name = "unicast";
+            this.unicast.Size = new System.Drawing.Size(62, 17);
+            this.unicast.TabIndex = 11;
+            this.unicast.Text = "Unicast";
+            this.unicast.UseVisualStyleBackColor = true;
+            this.unicast.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -219,6 +234,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.Button connect;
         private System.Windows.Forms.Button selectRig;
+        private System.Windows.Forms.CheckBox unicast;
     }
 }
 
