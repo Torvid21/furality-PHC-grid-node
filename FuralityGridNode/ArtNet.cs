@@ -49,10 +49,6 @@ namespace FuralityGridNode
             ReceivedData,
         }
 
-        public void HaukcodeClient()
-        {
-            var channel = Channel.CreateUnbounded<>();
-        }
 
 
         public string ErrorMessage = "";

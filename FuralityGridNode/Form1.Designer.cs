@@ -35,6 +35,8 @@ namespace FuralityGridNode
             this.helloToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configPanel = new System.Windows.Forms.Panel();
+            this.LoadLayout = new System.Windows.Forms.Button();
+            this.GenerateLayout = new System.Windows.Forms.Button();
             this.selectRig = new System.Windows.Forms.Button();
             this.connect = new System.Windows.Forms.Button();
             this.statusLabel = new System.Windows.Forms.Label();
@@ -45,6 +47,7 @@ namespace FuralityGridNode
             this.portInput = new System.Windows.Forms.TextBox();
             this.ipInput = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.UnloadLayout = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.configPanel.SuspendLayout();
             this.SuspendLayout();
@@ -73,6 +76,9 @@ namespace FuralityGridNode
             // 
             // configPanel
             // 
+            this.configPanel.Controls.Add(this.UnloadLayout);
+            this.configPanel.Controls.Add(this.LoadLayout);
+            this.configPanel.Controls.Add(this.GenerateLayout);
             this.configPanel.Controls.Add(this.selectRig);
             this.configPanel.Controls.Add(this.connect);
             this.configPanel.Controls.Add(this.statusLabel);
@@ -84,8 +90,28 @@ namespace FuralityGridNode
             this.configPanel.Controls.Add(this.ipInput);
             this.configPanel.Location = new System.Drawing.Point(12, 12);
             this.configPanel.Name = "configPanel";
-            this.configPanel.Size = new System.Drawing.Size(165, 184);
+            this.configPanel.Size = new System.Drawing.Size(328, 184);
             this.configPanel.TabIndex = 1;
+            // 
+            // LoadLayout
+            // 
+            this.LoadLayout.Location = new System.Drawing.Point(112, 121);
+            this.LoadLayout.Name = "LoadLayout";
+            this.LoadLayout.Size = new System.Drawing.Size(104, 23);
+            this.LoadLayout.TabIndex = 12;
+            this.LoadLayout.Text = "Load Layout";
+            this.LoadLayout.UseVisualStyleBackColor = true;
+            this.LoadLayout.Click += new System.EventHandler(this.LoadLayout_Click);
+            // 
+            // GenerateLayout
+            // 
+            this.GenerateLayout.Location = new System.Drawing.Point(112, 151);
+            this.GenerateLayout.Name = "GenerateLayout";
+            this.GenerateLayout.Size = new System.Drawing.Size(104, 23);
+            this.GenerateLayout.TabIndex = 11;
+            this.GenerateLayout.Text = "Generate Layout";
+            this.GenerateLayout.UseVisualStyleBackColor = true;
+            this.GenerateLayout.Click += new System.EventHandler(this.GenerateLayout_Click);
             // 
             // selectRig
             // 
@@ -99,7 +125,7 @@ namespace FuralityGridNode
             // 
             // connect
             // 
-            this.connect.Location = new System.Drawing.Point(3, 121);
+            this.connect.Location = new System.Drawing.Point(6, 122);
             this.connect.Name = "connect";
             this.connect.Size = new System.Drawing.Size(75, 23);
             this.connect.TabIndex = 9;
@@ -182,6 +208,16 @@ namespace FuralityGridNode
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // UnloadLayout
+            // 
+            this.UnloadLayout.Location = new System.Drawing.Point(221, 121);
+            this.UnloadLayout.Name = "UnloadLayout";
+            this.UnloadLayout.Size = new System.Drawing.Size(104, 23);
+            this.UnloadLayout.TabIndex = 13;
+            this.UnloadLayout.Text = "Unload Layout";
+            this.UnloadLayout.UseVisualStyleBackColor = true;
+            this.UnloadLayout.Click += new System.EventHandler(this.UnloadLayout_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -219,6 +255,9 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.Button connect;
         private System.Windows.Forms.Button selectRig;
+        private System.Windows.Forms.Button LoadLayout;
+        private System.Windows.Forms.Button GenerateLayout;
+        private System.Windows.Forms.Button UnloadLayout;
     }
 }
 
