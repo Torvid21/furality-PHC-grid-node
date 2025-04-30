@@ -50,6 +50,7 @@ namespace FuralityGridNode
             this.unicast = new System.Windows.Forms.CheckBox();
             this.connect = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.layoutStatus = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.configPanel.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -89,6 +90,7 @@ namespace FuralityGridNode
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.layoutStatus);
             this.groupBox2.Controls.Add(this.colorTypeDropdown);
             this.groupBox2.Controls.Add(this.UnloadLayout);
             this.groupBox2.Controls.Add(this.label3);
@@ -108,7 +110,7 @@ namespace FuralityGridNode
             "VRSL",
             "Packed",
             "FRig"});
-            this.colorTypeDropdown.Location = new System.Drawing.Point(6, 19);
+            this.colorTypeDropdown.Location = new System.Drawing.Point(10, 19);
             this.colorTypeDropdown.Name = "colorTypeDropdown";
             this.colorTypeDropdown.Size = new System.Drawing.Size(64, 21);
             this.colorTypeDropdown.TabIndex = 7;
@@ -118,7 +120,7 @@ namespace FuralityGridNode
             // 
             // UnloadLayout
             // 
-            this.UnloadLayout.Location = new System.Drawing.Point(6, 149);
+            this.UnloadLayout.Location = new System.Drawing.Point(10, 118);
             this.UnloadLayout.Name = "UnloadLayout";
             this.UnloadLayout.Size = new System.Drawing.Size(104, 23);
             this.UnloadLayout.TabIndex = 13;
@@ -129,7 +131,7 @@ namespace FuralityGridNode
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(76, 22);
+            this.label3.Location = new System.Drawing.Point(80, 22);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(31, 13);
             this.label3.TabIndex = 14;
@@ -138,7 +140,7 @@ namespace FuralityGridNode
             // 
             // selectRig
             // 
-            this.selectRig.Location = new System.Drawing.Point(6, 91);
+            this.selectRig.Location = new System.Drawing.Point(10, 60);
             this.selectRig.Name = "selectRig";
             this.selectRig.Size = new System.Drawing.Size(104, 23);
             this.selectRig.TabIndex = 10;
@@ -148,7 +150,7 @@ namespace FuralityGridNode
             // 
             // LoadLayout
             // 
-            this.LoadLayout.Location = new System.Drawing.Point(6, 120);
+            this.LoadLayout.Location = new System.Drawing.Point(10, 89);
             this.LoadLayout.Name = "LoadLayout";
             this.LoadLayout.Size = new System.Drawing.Size(104, 23);
             this.LoadLayout.TabIndex = 12;
@@ -183,7 +185,7 @@ namespace FuralityGridNode
             // 
             // ipInput
             // 
-            this.ipInput.Location = new System.Drawing.Point(6, 16);
+            this.ipInput.Location = new System.Drawing.Point(9, 16);
             this.ipInput.Name = "ipInput";
             this.ipInput.Size = new System.Drawing.Size(89, 20);
             this.ipInput.TabIndex = 0;
@@ -193,7 +195,7 @@ namespace FuralityGridNode
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(101, 19);
+            this.label1.Location = new System.Drawing.Point(104, 19);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(58, 13);
             this.label1.TabIndex = 2;
@@ -201,7 +203,7 @@ namespace FuralityGridNode
             // 
             // portInput
             // 
-            this.portInput.Location = new System.Drawing.Point(6, 42);
+            this.portInput.Location = new System.Drawing.Point(9, 42);
             this.portInput.Name = "portInput";
             this.portInput.Size = new System.Drawing.Size(44, 20);
             this.portInput.TabIndex = 1;
@@ -211,7 +213,7 @@ namespace FuralityGridNode
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(55, 45);
+            this.label2.Location = new System.Drawing.Point(58, 45);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(26, 13);
             this.label2.TabIndex = 3;
@@ -222,7 +224,7 @@ namespace FuralityGridNode
             this.unicast.AutoSize = true;
             this.unicast.Checked = true;
             this.unicast.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.unicast.Location = new System.Drawing.Point(6, 68);
+            this.unicast.Location = new System.Drawing.Point(9, 68);
             this.unicast.Name = "unicast";
             this.unicast.Size = new System.Drawing.Size(62, 17);
             this.unicast.TabIndex = 11;
@@ -246,11 +248,20 @@ namespace FuralityGridNode
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // layoutStatus
+            // 
+            this.layoutStatus.AutoSize = true;
+            this.layoutStatus.Location = new System.Drawing.Point(7, 159);
+            this.layoutStatus.Name = "layoutStatus";
+            this.layoutStatus.Size = new System.Drawing.Size(35, 13);
+            this.layoutStatus.TabIndex = 13;
+            this.layoutStatus.Text = "VRSL";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1920, 208);
+            this.ClientSize = new System.Drawing.Size(646, 208);
             this.ContextMenuStrip = this.contextMenuStrip1;
             this.ControlBox = false;
             this.Controls.Add(this.configPanel);
@@ -291,6 +302,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label statusLabel;
+        private System.Windows.Forms.Label layoutStatus;
     }
 }
 

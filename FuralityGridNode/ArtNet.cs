@@ -21,7 +21,6 @@ namespace FuralityGridNode
 
         public ArtNet(string address, string port)
         {
-
             if (!IPAddress.TryParse(address, out listenAddress))
                 status = ArtNetClientStatus.MalformedAddress;
 

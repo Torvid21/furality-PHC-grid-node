@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace FuralityGridNode
 {
@@ -15,13 +16,11 @@ namespace FuralityGridNode
     {
         static int size = 16;
         static int countY = 13;
-        static int countX = (512 / countY + 1);
+        static int countX = 120;
         static bool customLayout;
         static bool unicastCheck = true;
 
         private ArtNet artnetClient;
-
-        //static Bitmap bmp;
 
         public Form1()
         {
@@ -105,16 +104,17 @@ namespace FuralityGridNode
         static string statusText = "";
         static string statusTextLast = "";
 
-        void DrawSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte R, byte G, byte B)
+        void DrawSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte R, byte G, byte B, byte A)
         {
             for (int x = X; x < X + sizeX; x++)
             {
                 for (int y = Y; y < Y + sizeY; y++)
                 {
-                    int index = (x + y * dataSizeX) * 3;
+                    int index = (x + y * dataSizeX) * 4;
                     data[index + 0] = B; // R
                     data[index + 1] = G; // G
                     data[index + 2] = R; // B
+                    data[index + 3] = A; // A
                 }
             }
         }
@@ -122,9 +122,9 @@ namespace FuralityGridNode
         public void DrawData()
         {
             combinedData = artnetClient.combinedData;
-            int sizeX = countX * size * 3;
+            int sizeX = countX * size;
             int sizeY = countY * size;
-            byte[] output = new byte[sizeX * sizeY * 3];
+            byte[] output = new byte[sizeX * sizeY * 4];
 
             string selectedItem = colorTypeDropdown.SelectedItem as string;
 #if DEBUG
@@ -150,7 +150,7 @@ namespace FuralityGridNode
                             y = layoutMapping[channel].y;
                         }
                         
-                        DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, data, data, data);
+                        DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, data, data, data, 255);
                     }
                 }
             }
@@ -171,7 +171,7 @@ namespace FuralityGridNode
                         x = layoutMapping[channel].x;
                         y = layoutMapping[channel].y;
                     }
-                    DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, dataR, dataG, dataB);
+                    DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, dataR, dataG, dataB, 255);
                 }
             }
             else if (selectedItem == "FRig")
@@ -204,35 +204,38 @@ namespace FuralityGridNode
                             index++;
                         }
                     }
-                } else
+                }
+                else
                 {
-                    var frigFile = new FRigFile();
-                    var frigBaseFile = FuralityGridNode.Properties.Resources.FrigBaseDebug;
-                    var frigBase = Encoding.UTF8.GetString(frigBaseFile);
-                    currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
+                    //var frigFile = new FRigFile();
+                    //var frigBaseFile = FuralityGridNode.Properties.Resources.FrigBaseDebug;
+                    //var frigBase = Encoding.UTF8.GetString(frigBaseFile);
+                    //currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
                 }
             }
             if (output == null)
                 return;
 
+            SpoutWrapper.SendImage(output, sizeX, sizeY);
+
             // win32 fast draw byte[] to a control. Idk why the default C# functions are so disgustingly slow.
-            GCHandle pinnedArray = GCHandle.Alloc(output, GCHandleType.Pinned);
-            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-            IntPtr hdc = g.GetHdc();
-            BITMAPINFO bmi = new BITMAPINFO();
-            bmi.bmiHeader = new BITMAPINFOHEADER
-            {
-                biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
-                biWidth = sizeX,
-                biHeight = -sizeY, // Negative height to indicate a top-down DIB
-                biPlanes = 1,
-                biBitCount = 24,
-                biCompression = 0, // BI_RGB
-                biSizeImage = (uint)(sizeY * sizeX)
-            };
-            StretchDIBits(hdc, 0, 0, sizeX, sizeY, 0, 0, sizeX, sizeY, pointer, ref bmi, 0, 0x00CC0020);
-            g.ReleaseHdc(hdc);
-            pinnedArray.Free();
+            //GCHandle pinnedArray = GCHandle.Alloc(output, GCHandleType.Pinned);
+            //IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+            //IntPtr hdc = g.GetHdc();
+            //BITMAPINFO bmi = new BITMAPINFO();
+            //bmi.bmiHeader = new BITMAPINFOHEADER
+            //{
+            //    biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
+            //    biWidth = sizeX,
+            //    biHeight = -sizeY, // Negative height to indicate a top-down DIB
+            //    biPlanes = 1,
+            //    biBitCount = 24,
+            //    biCompression = 0, // BI_RGB
+            //    biSizeImage = (uint)(sizeY * sizeX)
+            //};
+            //StretchDIBits(hdc, 0, 0, sizeX, sizeY, 0, 0, sizeX, sizeY, pointer, ref bmi, 0, 0x00CC0020);
+            //g.ReleaseHdc(hdc);
+            //pinnedArray.Free();
         }
 
         private void DrawColorSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte dataIn, int selector)
@@ -241,7 +244,7 @@ namespace FuralityGridNode
             {
                 for (int y = Y; y < Y + sizeY; y++)
                 {
-                    int index = (x + y * dataSizeX) * 3;
+                    int index = (x + y * dataSizeX) * 4;
                     switch (selector) {
                         case 1:
                             data[index + 2] = dataIn; // R
@@ -253,6 +256,7 @@ namespace FuralityGridNode
                             data[index + 0] = dataIn; // B
                             break;
                         default:
+                            data[index + 4] = dataIn; // A
                             data[index + 2] = dataIn; // R
                             data[index + 1] = dataIn; // G
                             data[index + 0] = dataIn; // B
@@ -265,6 +269,7 @@ namespace FuralityGridNode
         private void Form1_Load(object sender, EventArgs e)
         {
             StartArtNetClient();
+            SpoutWrapper.CreateSender("Furality GridNode");
         }
 
         void StartArtNetClient()
@@ -523,6 +528,7 @@ namespace FuralityGridNode
 
         Dictionary<int, (int x, int y)> layoutMapping;
 
+        
         private void LoadLayout_Click(object sender, EventArgs e)
         {
             OpenFileDialog f = new OpenFileDialog();
@@ -538,7 +544,7 @@ namespace FuralityGridNode
             string json = File.ReadAllText(f.FileName);
             DMXLayout layout = JsonSerializer.Deserialize<DMXLayout>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive=false, IncludeFields = true, WriteIndented = true });
 
-            this.Size = new Size(layout.resolutionX, layout.resolutionY);
+            //this.Size = new Size(layout.resolutionX, layout.resolutionY);
 
             countX = layout.dmxSizeX;
             countY = layout.dmxSizeY;
@@ -549,6 +555,7 @@ namespace FuralityGridNode
                 layoutMapping.Add(i, ((layout.coords[i].dmxX), (layout.coords[i].dmxY)));
             }
 
+            layoutStatus.Text = Path.GetFileName(f.FileName);
             customLayout = true;
         }
 
@@ -556,8 +563,9 @@ namespace FuralityGridNode
         {
             customLayout = false;
             countY = 13;
-            countX = (512 / countY + 1);
-            this.Size = new Size(1920, 208);
+            countX = 120;
+            layoutStatus.Text = "VRSL";
+            //this.Size = new Size(1920, 208);
         }
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
@@ -568,6 +576,11 @@ namespace FuralityGridNode
         private void label3_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            GenerateLayout_Click(sender, e);
         }
     }
 }
