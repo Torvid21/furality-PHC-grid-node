@@ -270,6 +270,7 @@ namespace FuralityGridNode
         {
             StartArtNetClient();
             SpoutWrapper.CreateSender("Furality GridNode");
+            layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 
         void StartArtNetClient()
@@ -531,6 +532,8 @@ namespace FuralityGridNode
         
         private void LoadLayout_Click(object sender, EventArgs e)
         {
+            layoutStatus.Text = "Loading...";
+
             OpenFileDialog f = new OpenFileDialog();
             f.Title = "Select Layout File.";
             f.Filter = "Json files (*.json) | *.json";
@@ -555,7 +558,7 @@ namespace FuralityGridNode
                 layoutMapping.Add(i, ((layout.coords[i].dmxX), (layout.coords[i].dmxY)));
             }
 
-            layoutStatus.Text = Path.GetFileName(f.FileName);
+            layoutStatus.Text = $"{Path.GetFileNameWithoutExtension(f.FileName)}\nsize: {layout.resolutionX}x{layout.resolutionY}\nchannels: {layout.channelCount}";
             customLayout = true;
         }
 
@@ -564,7 +567,7 @@ namespace FuralityGridNode
             customLayout = false;
             countY = 13;
             countX = 120;
-            layoutStatus.Text = "VRSL";
+            layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
             //this.Size = new Size(1920, 208);
         }
         private void checkBox1_CheckedChanged(object sender, EventArgs e)

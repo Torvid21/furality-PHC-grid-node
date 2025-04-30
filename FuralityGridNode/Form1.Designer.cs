@@ -120,7 +120,7 @@ namespace FuralityGridNode
             // 
             // UnloadLayout
             // 
-            this.UnloadLayout.Location = new System.Drawing.Point(10, 118);
+            this.UnloadLayout.Location = new System.Drawing.Point(10, 104);
             this.UnloadLayout.Name = "UnloadLayout";
             this.UnloadLayout.Size = new System.Drawing.Size(104, 23);
             this.UnloadLayout.TabIndex = 13;
@@ -140,7 +140,7 @@ namespace FuralityGridNode
             // 
             // selectRig
             // 
-            this.selectRig.Location = new System.Drawing.Point(10, 60);
+            this.selectRig.Location = new System.Drawing.Point(10, 46);
             this.selectRig.Name = "selectRig";
             this.selectRig.Size = new System.Drawing.Size(104, 23);
             this.selectRig.TabIndex = 10;
@@ -150,7 +150,7 @@ namespace FuralityGridNode
             // 
             // LoadLayout
             // 
-            this.LoadLayout.Location = new System.Drawing.Point(10, 89);
+            this.LoadLayout.Location = new System.Drawing.Point(10, 75);
             this.LoadLayout.Name = "LoadLayout";
             this.LoadLayout.Size = new System.Drawing.Size(104, 23);
             this.LoadLayout.TabIndex = 12;
@@ -250,12 +250,11 @@ namespace FuralityGridNode
             // 
             // layoutStatus
             // 
-            this.layoutStatus.AutoSize = true;
-            this.layoutStatus.Location = new System.Drawing.Point(7, 159);
+            this.layoutStatus.Location = new System.Drawing.Point(7, 130);
             this.layoutStatus.Name = "layoutStatus";
-            this.layoutStatus.Size = new System.Drawing.Size(35, 13);
+            this.layoutStatus.Size = new System.Drawing.Size(193, 45);
             this.layoutStatus.TabIndex = 13;
-            this.layoutStatus.Text = "VRSL";
+            this.layoutStatus.Text = "VRSL\r\nsize: 1920x208\r\nchannels: 1560";
             // 
             // Form1
             // 
