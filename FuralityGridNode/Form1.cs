@@ -125,6 +125,7 @@ namespace FuralityGridNode
             int sizeX = countX * size;
             int sizeY = countY * size;
             byte[] output = new byte[sizeX * sizeY * 4];
+            byte[] preview = new byte[countX * countY * 4];
 
             string selectedItem = colorTypeDropdown.SelectedItem as string;
 #if DEBUG
@@ -149,8 +150,9 @@ namespace FuralityGridNode
                             x = layoutMapping[channel].x;
                             y = layoutMapping[channel].y;
                         }
-                        
-                        DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, data, data, data, 255);
+
+                        DrawSquare(preview, countX, countY, x, y, 1, 1, data, data, data, 255);
+                        DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, data, data, data, 255); // ((data > 0) ? (byte)255 : (byte)0)
                     }
                 }
             }
@@ -171,6 +173,7 @@ namespace FuralityGridNode
                         x = layoutMapping[channel].x;
                         y = layoutMapping[channel].y;
                     }
+                    DrawSquare(preview, countX, countY, x, y, 1, 1, dataR, dataG, dataB, 255);
                     DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, dataR, dataG, dataB, 255);
                 }
             }
@@ -199,6 +202,7 @@ namespace FuralityGridNode
 
                             int color = fixture.GridColor;
 
+                            DrawColorSquare(preview, countX, countY, gridX, gridY, 1, 1, data, fixture.GridColor);
                             DrawColorSquare(output, sizeX, sizeY, pixelX, pixelY, size, size, data, fixture.GridColor);
 
                             index++;
@@ -217,25 +221,26 @@ namespace FuralityGridNode
                 return;
 
             SpoutWrapper.SendImage(output, sizeX, sizeY);
-
+            
             // win32 fast draw byte[] to a control. Idk why the default C# functions are so disgustingly slow.
-            //GCHandle pinnedArray = GCHandle.Alloc(output, GCHandleType.Pinned);
-            //IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-            //IntPtr hdc = g.GetHdc();
-            //BITMAPINFO bmi = new BITMAPINFO();
-            //bmi.bmiHeader = new BITMAPINFOHEADER
-            //{
-            //    biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
-            //    biWidth = sizeX,
-            //    biHeight = -sizeY, // Negative height to indicate a top-down DIB
-            //    biPlanes = 1,
-            //    biBitCount = 24,
-            //    biCompression = 0, // BI_RGB
-            //    biSizeImage = (uint)(sizeY * sizeX)
-            //};
-            //StretchDIBits(hdc, 0, 0, sizeX, sizeY, 0, 0, sizeX, sizeY, pointer, ref bmi, 0, 0x00CC0020);
-            //g.ReleaseHdc(hdc);
-            //pinnedArray.Free();
+            GCHandle pinnedArray = GCHandle.Alloc(preview, GCHandleType.Pinned);
+            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+            Graphics gr = gridPreview.CreateGraphics();
+            IntPtr hdc = gr.GetHdc();
+            BITMAPINFO bmi = new BITMAPINFO();
+            bmi.bmiHeader = new BITMAPINFOHEADER
+            {
+                biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
+                biWidth = countX,
+                biHeight = -countY, // Negative height to indicate a top-down DIB
+                biPlanes = 1,
+                biBitCount = 32,
+                biCompression = 0, // BI_RGB
+                biSizeImage = (uint)(countY * countX)
+            };
+            StretchDIBits(hdc, 8, 16, countX, countY, 0, 0, countX, countY, pointer, ref bmi, 0, 0x00CC0020);
+            gr.ReleaseHdc(hdc);
+            pinnedArray.Free();
         }
 
         private void DrawColorSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte dataIn, int selector)
@@ -269,7 +274,7 @@ namespace FuralityGridNode
         private void Form1_Load(object sender, EventArgs e)
         {
             StartArtNetClient();
-            SpoutWrapper.CreateSender("Furality GridNode");
+            SpoutWrapper.CreateSender("Furality Grid Node");
             layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 
@@ -280,12 +285,12 @@ namespace FuralityGridNode
             artnetClient.StartClient();
         }
 
-        private void Config_Click(object sender, EventArgs e)
-        {
-            configPanel.Visible = !configPanel.Visible;
-            Application.DoEvents();
-            DrawData();
-        }
+        //private void Config_Click(object sender, EventArgs e)
+        //{
+        //    configPanel.Visible = !configPanel.Visible;
+        //    Application.DoEvents();
+        //    DrawData();
+        //}
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -416,116 +421,116 @@ namespace FuralityGridNode
             public List<DMXCoord> coords = new List<DMXCoord>();
         }
 
-        private void GenerateLayout_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog f = new OpenFileDialog();
-            f.Title = "Select Image.";
-            f.Filter = "Image files (*.png) | *.png";
-
-            if (f.ShowDialog() != DialogResult.OK)
-                return;
-
-            if (!File.Exists(f.FileName))
-                return;
-
-            SaveFileDialog f2 = new SaveFileDialog();
-            f2.Title = "Select Where to save Layout file and Mask.";
-            f2.Filter = "Json files (*.json) | *.json";
-
-            if (f2.ShowDialog() != DialogResult.OK)
-                return;
-
-            var (data, sizeX, sizeY) = Utils.ReadPng(f.FileName);
-
-            int DmxX = sizeX / 16;
-            int DmxY = sizeY / 16;
-
-            DMXLayout layout = new DMXLayout();
-            layout.resolutionX = sizeX;
-            layout.resolutionY = sizeY;
-            layout.dmxSizeX = DmxX;
-            layout.dmxSizeY = DmxY;
-
-            int channelCount = 0;
-            for (int x = 0; x < DmxX; x++)
-            {
-                for (int y = 0; y < DmxY; y++)
-                {
-                    bool found = true;
-                    for (int X = 0; X < 16; X++)
-                    {
-                        for (int Y = 0; Y < 16; Y++)
-                        {
-                            int lX = x * 16 + X;
-                            int lY = y * 16 + Y;
-
-                            int i = lX + lY * sizeX;
-                            byte R = data[i * 4 + 0];
-                            byte G = data[i * 4 + 1];
-                            byte B = data[i * 4 + 2];
-                            byte A = data[i * 4 + 3];
-                            if (A > 0)
-                            {
-                                found = false;
-                                break;
-                            }
-                        }
-                        if (!found)
-                            break;
-                    }
-                    // Fill the pixel
-                    if (found)
-                    {
-                        float tX = (x * 16 + 8) / (float)sizeX;
-                        float tY = (y * 16 + 8) / (float)sizeY;
-                        layout.coords.Add(new DMXCoord { uvX = tX, uvY = tY, dmxX = x, dmxY = y, 
-                            channel = channelCount, 
-                        });
-
-                        channelCount++;
-                    }
-                    for (int X = 0; X < 16; X++)
-                    {
-                        for (int Y = 0; Y < 16; Y++)
-                        {
-                            int lX = x * 16 + X;
-                            int lY = y * 16 + Y;
-
-                            int i = lX + lY * sizeX;
-                        if (found)
-                        {
-                            data[i * 4 + 0] = 255;
-                            data[i * 4 + 1] = 255;
-                            data[i * 4 + 2] = 255;
-                            data[i * 4 + 3] = 255;
-                        }
-                        else
-                        {
-                            data[i * 4 + 0] = 0;
-                            data[i * 4 + 1] = 0;
-                            data[i * 4 + 2] = 0;
-                            data[i * 4 + 3] = 0;
-                        }
-                        //if ((x % 2) == (y % 2))
-                        //{
-                        //    data[i * 4 + 0] = 128;
-                        //    data[i * 4 + 1] = 0;
-                        //    data[i * 4 + 2] = 128;
-                        //    data[i * 4 + 3] = 255;
-                        //}
-                        }
-                    }
-                }
-            }
-            layout.channelCount = channelCount;
-
-            string json = JsonSerializer.Serialize(layout, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
-
-            File.WriteAllText(f2.FileName, json);
-            string name = Path.GetFileNameWithoutExtension(f2.FileName);
-            string dir = Path.GetDirectoryName(f2.FileName);
-            Utils.WritePng(dir + "\\" + name + "_mask.png", data, sizeX, sizeY);
-        }
+        //private void GenerateLayout_Click(object sender, EventArgs e)
+        //{
+        //    OpenFileDialog f = new OpenFileDialog();
+        //    f.Title = "Select Image.";
+        //    f.Filter = "Image files (*.png) | *.png";
+        //
+        //    if (f.ShowDialog() != DialogResult.OK)
+        //        return;
+        //
+        //    if (!File.Exists(f.FileName))
+        //        return;
+        //
+        //    SaveFileDialog f2 = new SaveFileDialog();
+        //    f2.Title = "Select Where to save Layout file and Mask.";
+        //    f2.Filter = "Json files (*.json) | *.json";
+        //
+        //    if (f2.ShowDialog() != DialogResult.OK)
+        //        return;
+        //
+        //    var (data, sizeX, sizeY) = Utils.ReadPng(f.FileName);
+        //
+        //    int DmxX = sizeX / 16;
+        //    int DmxY = sizeY / 16;
+        //
+        //    DMXLayout layout = new DMXLayout();
+        //    layout.resolutionX = sizeX;
+        //    layout.resolutionY = sizeY;
+        //    layout.dmxSizeX = DmxX;
+        //    layout.dmxSizeY = DmxY;
+        //
+        //    int channelCount = 0;
+        //    for (int x = 0; x < DmxX; x++)
+        //    {
+        //        for (int y = 0; y < DmxY; y++)
+        //        {
+        //            bool found = true;
+        //            for (int X = 0; X < 16; X++)
+        //            {
+        //                for (int Y = 0; Y < 16; Y++)
+        //                {
+        //                    int lX = x * 16 + X;
+        //                    int lY = y * 16 + Y;
+        //
+        //                    int i = lX + lY * sizeX;
+        //                    byte R = data[i * 4 + 0];
+        //                    byte G = data[i * 4 + 1];
+        //                    byte B = data[i * 4 + 2];
+        //                    byte A = data[i * 4 + 3];
+        //                    if (A > 0)
+        //                    {
+        //                        found = false;
+        //                        break;
+        //                    }
+        //                }
+        //                if (!found)
+        //                    break;
+        //            }
+        //            // Fill the pixel
+        //            if (found)
+        //            {
+        //                float tX = (x * 16 + 8) / (float)sizeX;
+        //                float tY = (y * 16 + 8) / (float)sizeY;
+        //                layout.coords.Add(new DMXCoord { uvX = tX, uvY = tY, dmxX = x, dmxY = y, 
+        //                    channel = channelCount, 
+        //                });
+        //
+        //                channelCount++;
+        //            }
+        //            for (int X = 0; X < 16; X++)
+        //            {
+        //                for (int Y = 0; Y < 16; Y++)
+        //                {
+        //                    int lX = x * 16 + X;
+        //                    int lY = y * 16 + Y;
+        //
+        //                    int i = lX + lY * sizeX;
+        //                if (found)
+        //                {
+        //                    data[i * 4 + 0] = 255;
+        //                    data[i * 4 + 1] = 255;
+        //                    data[i * 4 + 2] = 255;
+        //                    data[i * 4 + 3] = 255;
+        //                }
+        //                else
+        //                {
+        //                    data[i * 4 + 0] = 0;
+        //                    data[i * 4 + 1] = 0;
+        //                    data[i * 4 + 2] = 0;
+        //                    data[i * 4 + 3] = 0;
+        //                }
+        //                //if ((x % 2) == (y % 2))
+        //                //{
+        //                //    data[i * 4 + 0] = 128;
+        //                //    data[i * 4 + 1] = 0;
+        //                //    data[i * 4 + 2] = 128;
+        //                //    data[i * 4 + 3] = 255;
+        //                //}
+        //                }
+        //            }
+        //        }
+        //    }
+        //    layout.channelCount = channelCount;
+        //
+        //    string json = JsonSerializer.Serialize(layout, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
+        //
+        //    File.WriteAllText(f2.FileName, json);
+        //    string name = Path.GetFileNameWithoutExtension(f2.FileName);
+        //    string dir = Path.GetDirectoryName(f2.FileName);
+        //    Utils.WritePng(dir + "\\" + name + "_mask.png", data, sizeX, sizeY);
+        //}
 
         Dictionary<int, (int x, int y)> layoutMapping;
 
@@ -576,14 +581,5 @@ namespace FuralityGridNode
             unicastCheck = checkBox.Checked;
         }
 
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            GenerateLayout_Click(sender, e);
-        }
     }
 }
