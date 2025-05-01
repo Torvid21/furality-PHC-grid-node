@@ -51,6 +51,7 @@ namespace FuralityGridNode
             this.unicast = new System.Windows.Forms.CheckBox();
             this.connect = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.testAnimation = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -81,7 +82,7 @@ namespace FuralityGridNode
             // 
             this.gridPreview.Location = new System.Drawing.Point(505, 7);
             this.gridPreview.Name = "gridPreview";
-            this.gridPreview.Size = new System.Drawing.Size(240, 135);
+            this.gridPreview.Size = new System.Drawing.Size(320, 180);
             this.gridPreview.TabIndex = 17;
             this.gridPreview.TabStop = false;
             this.gridPreview.Text = "Preview";
@@ -96,7 +97,7 @@ namespace FuralityGridNode
             this.groupBox2.Controls.Add(this.LoadLayout);
             this.groupBox2.Location = new System.Drawing.Point(258, 7);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(240, 188);
+            this.groupBox2.Size = new System.Drawing.Size(240, 209);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Rig";
@@ -174,7 +175,7 @@ namespace FuralityGridNode
             this.groupBox1.Controls.Add(this.connect);
             this.groupBox1.Location = new System.Drawing.Point(12, 7);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(240, 188);
+            this.groupBox1.Size = new System.Drawing.Size(240, 209);
             this.groupBox1.TabIndex = 15;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "ArtNet";
@@ -253,12 +254,23 @@ namespace FuralityGridNode
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // testAnimation
+            // 
+            this.testAnimation.Location = new System.Drawing.Point(505, 193);
+            this.testAnimation.Name = "testAnimation";
+            this.testAnimation.Size = new System.Drawing.Size(122, 23);
+            this.testAnimation.TabIndex = 15;
+            this.testAnimation.Text = "Play Test Animation";
+            this.testAnimation.UseVisualStyleBackColor = true;
+            this.testAnimation.Click += new System.EventHandler(this.testAnimation_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(757, 207);
+            this.ClientSize = new System.Drawing.Size(844, 224);
             this.ContextMenuStrip = this.contextMenuStrip1;
+            this.Controls.Add(this.testAnimation);
             this.Controls.Add(this.gridPreview);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -301,6 +313,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.Label layoutStatus;
         private System.Windows.Forms.GroupBox gridPreview;
+        private System.Windows.Forms.Button testAnimation;
     }
 }
 

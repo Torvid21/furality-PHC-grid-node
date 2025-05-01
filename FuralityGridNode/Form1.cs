@@ -119,19 +119,18 @@ namespace FuralityGridNode
             }
         }
 
-        public void DrawData()
+        public void DrawData(byte[] combinedData)
         {
-            combinedData = artnetClient.combinedData;
             int sizeX = countX * size;
             int sizeY = countY * size;
+            int previewScale = 2;
             byte[] output = new byte[sizeX * sizeY * 4];
-            byte[] preview = new byte[countX * countY * 4];
+            byte[] preview = new byte[countX * countY * 4 * (previewScale * previewScale)];
 
             string selectedItem = colorTypeDropdown.SelectedItem as string;
 #if DEBUG
             //selectedItem = "FRig";
 #endif
-
             if (selectedItem == "VRSL")
             {
                 for (int universe = 0; universe < 3; universe++)
@@ -151,7 +150,7 @@ namespace FuralityGridNode
                             y = layoutMapping[channel].y;
                         }
 
-                        DrawSquare(preview, countX, countY, x, y, 1, 1, data, data, data, 255);
+                        DrawSquare(preview, countX * previewScale, countY* previewScale, x * previewScale, y * previewScale, previewScale, previewScale, data, data, data, 255);
                         DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, data, data, data, 255); // ((data > 0) ? (byte)255 : (byte)0)
                     }
                 }
@@ -173,7 +172,7 @@ namespace FuralityGridNode
                         x = layoutMapping[channel].x;
                         y = layoutMapping[channel].y;
                     }
-                    DrawSquare(preview, countX, countY, x, y, 1, 1, dataR, dataG, dataB, 255);
+                    DrawSquare(preview, countX * previewScale, countY * previewScale, x * previewScale, y * previewScale, 1 * previewScale, 1 * previewScale, dataR, dataG, dataB, 255);
                     DrawSquare(output, sizeX, sizeY, x * size, y * size, size, size, dataR, dataG, dataB, 255);
                 }
             }
@@ -200,7 +199,7 @@ namespace FuralityGridNode
 
                         int color = fixture.GridColor;
 
-                        DrawColorSquare(preview, countX, countY, gridX, gridY, 1, 1, data, fixture.GridColor);
+                        DrawColorSquare(preview, countX * previewScale, countY * previewScale, gridX * previewScale, gridY * previewScale, 1 * previewScale, 1 * previewScale, data, fixture.GridColor);
                         DrawColorSquare(output, sizeX, sizeY, pixelX, pixelY, size, size, data, fixture.GridColor);
 
                         index++;
@@ -228,14 +227,14 @@ namespace FuralityGridNode
             bmi.bmiHeader = new BITMAPINFOHEADER
             {
                 biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
-                biWidth = countX,
-                biHeight = -countY, // Negative height to indicate a top-down DIB
+                biWidth = countX* previewScale,
+                biHeight = -countY * previewScale, // Negative height to indicate a top-down DIB
                 biPlanes = 1,
                 biBitCount = 32,
                 biCompression = 0, // BI_RGB
-                biSizeImage = (uint)(countY * countX)
+                biSizeImage = (uint)(countY * previewScale * countX * previewScale)
             };
-            StretchDIBits(hdc, 8, 16, countX, countY, 0, 0, countX, countY, pointer, ref bmi, 0, 0x00CC0020);
+            StretchDIBits(hdc, 8, 16, countX * previewScale, countY * previewScale, 0, 0, countX * previewScale, countY * previewScale, pointer, ref bmi, 0, 0x00CC0020);
             gr.ReleaseHdc(hdc);
             pinnedArray.Free();
         }
@@ -284,6 +283,27 @@ namespace FuralityGridNode
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (testAnimationTime > 0)
+            {
+                byte[] data;
+                if (customLayout)
+                    data = new byte[layoutMapping.Count*4];
+                else
+                    data = new byte[512 * 4];
+
+                for (int i = 0; i < data.Length; i++)
+                {
+                    float sin = (float)Math.Sin(i / 80.0f + testAnimationTime * 4.0f);
+                    if (sin < 0)
+                        sin += 1;
+                    float t = (float)Math.Min(Math.Max(sin, 0), 1);
+                    float fade = Math.Min(Math.Max(8 - Math.Abs(testAnimationTime * 16 - 8), 0), 1);
+                    data[i] = (byte)(t*fade*255);
+                }
+                DrawData(data);
+                testAnimationTime -= 0.0025f;
+                return;
+            }
 #if DEBUG
            //Trace.WriteLine($"ArtNet Status: {artnetClient.status}");
 #endif
@@ -299,7 +319,7 @@ namespace FuralityGridNode
             if (update)
             {
                 update = false;
-                DrawData();
+                DrawData(artnetClient.combinedData);
             }
 
             if (statusTextLast != statusText)
@@ -317,7 +337,7 @@ namespace FuralityGridNode
 
         private void colorTypeDropdown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            DrawData();
+            DrawData(artnetClient.combinedData);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -327,7 +347,7 @@ namespace FuralityGridNode
 
         private void inputChanged_TextChanged(object sender, EventArgs e)
         {
-            DrawData();
+            DrawData(artnetClient.combinedData);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -456,5 +476,10 @@ namespace FuralityGridNode
             unicastCheck = checkBox.Checked;
         }
 
+        float testAnimationTime = 0;
+        private void testAnimation_Click(object sender, EventArgs e)
+        {
+            testAnimationTime = 1.0f;
+        }
     }
 }

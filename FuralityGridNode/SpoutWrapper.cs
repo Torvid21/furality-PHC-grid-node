@@ -61,7 +61,7 @@ namespace FuralityGridNode
         public static void SendImage(byte[] data, int sizeX, int sizeY)
         {
             GCHandle pinnedArray = GCHandle.Alloc(data, GCHandleType.Pinned);
-            _SendImage(_obj, pinnedArray.AddrOfPinnedObject(), (uint)sizeX, (uint)sizeY, 0x1908, true);
+            _SendImage(_obj, pinnedArray.AddrOfPinnedObject(), (uint)sizeX, (uint)sizeY, 0x1908, false);
             pinnedArray.Free();
         }
         //public static void ReleaseSender()
