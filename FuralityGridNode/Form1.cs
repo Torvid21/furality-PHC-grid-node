@@ -179,34 +179,31 @@ namespace FuralityGridNode
             }
             else if (selectedItem == "FRig")
             {
-                if (currentRig != null)
+                if (currentRig != null && currentRig.Fixtures != null)
                 {
-                    if (currentRig != null && currentRig.Fixtures != null)
+                    int index = 0;
+                    foreach (Fixture fixture in currentRig.Fixtures)
                     {
-                        int index = 0;
-                        foreach (Fixture fixture in currentRig.Fixtures)
+                        int gridX = fixture.GridChannel / countY;
+                        int gridY = fixture.GridChannel % countY;
+                        if (customLayout)
                         {
-                            int gridX = fixture.GridChannel / countY;
-                            int gridY = fixture.GridChannel % countY;
-                            if (customLayout)
-                            {
-                                if (fixture.GridChannel >= layoutMapping.Count)
-                                    continue;
-                                gridX = layoutMapping[fixture.GridChannel].x;
-                                gridY = layoutMapping[fixture.GridChannel].y;
-                            }
-                            int pixelX = gridX * size;
-                            int pixelY = gridY * size;
-
-                            byte data = combinedData[fixture.UnityChannel - 1];
-
-                            int color = fixture.GridColor;
-
-                            DrawColorSquare(preview, countX, countY, gridX, gridY, 1, 1, data, fixture.GridColor);
-                            DrawColorSquare(output, sizeX, sizeY, pixelX, pixelY, size, size, data, fixture.GridColor);
-
-                            index++;
+                            if (fixture.GridChannel >= layoutMapping.Count)
+                                continue;
+                            gridX = layoutMapping[fixture.GridChannel].x;
+                            gridY = layoutMapping[fixture.GridChannel].y;
                         }
+                        int pixelX = gridX * size;
+                        int pixelY = gridY * size;
+
+                        byte data = combinedData[fixture.UnityChannel - 1];
+
+                        int color = fixture.GridColor;
+
+                        DrawColorSquare(preview, countX, countY, gridX, gridY, 1, 1, data, fixture.GridColor);
+                        DrawColorSquare(output, sizeX, sizeY, pixelX, pixelY, size, size, data, fixture.GridColor);
+
+                        index++;
                     }
                 }
                 else
@@ -285,13 +282,6 @@ namespace FuralityGridNode
             artnetClient.StartClient();
         }
 
-        //private void Config_Click(object sender, EventArgs e)
-        //{
-        //    configPanel.Visible = !configPanel.Visible;
-        //    Application.DoEvents();
-        //    DrawData();
-        //}
-
         private void timer1_Tick(object sender, EventArgs e)
         {
 #if DEBUG
@@ -345,8 +335,6 @@ namespace FuralityGridNode
             Trace.WriteLine("Button1 Clicked");
             artnetClient.Unicast = unicastCheck;
             artnetClient.RestartClient(ipInput.Text, portInput.Text);
-            //RestartClient();
-            //StartArtNetClient();
         }
 
         private void selectRig_Click(object sender, EventArgs e)
@@ -367,7 +355,6 @@ namespace FuralityGridNode
         }
 
         private FRig currentRig;
-
         private void LoadFRigFile(string filePath)
         {
             try
@@ -394,12 +381,6 @@ namespace FuralityGridNode
             }
         }
 
-        private void PackDMX_Click(object sender, EventArgs e)
-        {
-        }
-
-
-
         [Serializable]
         struct DMXCoord
         {
@@ -420,118 +401,6 @@ namespace FuralityGridNode
             public int channelCount;
             public List<DMXCoord> coords = new List<DMXCoord>();
         }
-
-        //private void GenerateLayout_Click(object sender, EventArgs e)
-        //{
-        //    OpenFileDialog f = new OpenFileDialog();
-        //    f.Title = "Select Image.";
-        //    f.Filter = "Image files (*.png) | *.png";
-        //
-        //    if (f.ShowDialog() != DialogResult.OK)
-        //        return;
-        //
-        //    if (!File.Exists(f.FileName))
-        //        return;
-        //
-        //    SaveFileDialog f2 = new SaveFileDialog();
-        //    f2.Title = "Select Where to save Layout file and Mask.";
-        //    f2.Filter = "Json files (*.json) | *.json";
-        //
-        //    if (f2.ShowDialog() != DialogResult.OK)
-        //        return;
-        //
-        //    var (data, sizeX, sizeY) = Utils.ReadPng(f.FileName);
-        //
-        //    int DmxX = sizeX / 16;
-        //    int DmxY = sizeY / 16;
-        //
-        //    DMXLayout layout = new DMXLayout();
-        //    layout.resolutionX = sizeX;
-        //    layout.resolutionY = sizeY;
-        //    layout.dmxSizeX = DmxX;
-        //    layout.dmxSizeY = DmxY;
-        //
-        //    int channelCount = 0;
-        //    for (int x = 0; x < DmxX; x++)
-        //    {
-        //        for (int y = 0; y < DmxY; y++)
-        //        {
-        //            bool found = true;
-        //            for (int X = 0; X < 16; X++)
-        //            {
-        //                for (int Y = 0; Y < 16; Y++)
-        //                {
-        //                    int lX = x * 16 + X;
-        //                    int lY = y * 16 + Y;
-        //
-        //                    int i = lX + lY * sizeX;
-        //                    byte R = data[i * 4 + 0];
-        //                    byte G = data[i * 4 + 1];
-        //                    byte B = data[i * 4 + 2];
-        //                    byte A = data[i * 4 + 3];
-        //                    if (A > 0)
-        //                    {
-        //                        found = false;
-        //                        break;
-        //                    }
-        //                }
-        //                if (!found)
-        //                    break;
-        //            }
-        //            // Fill the pixel
-        //            if (found)
-        //            {
-        //                float tX = (x * 16 + 8) / (float)sizeX;
-        //                float tY = (y * 16 + 8) / (float)sizeY;
-        //                layout.coords.Add(new DMXCoord { uvX = tX, uvY = tY, dmxX = x, dmxY = y, 
-        //                    channel = channelCount, 
-        //                });
-        //
-        //                channelCount++;
-        //            }
-        //            for (int X = 0; X < 16; X++)
-        //            {
-        //                for (int Y = 0; Y < 16; Y++)
-        //                {
-        //                    int lX = x * 16 + X;
-        //                    int lY = y * 16 + Y;
-        //
-        //                    int i = lX + lY * sizeX;
-        //                if (found)
-        //                {
-        //                    data[i * 4 + 0] = 255;
-        //                    data[i * 4 + 1] = 255;
-        //                    data[i * 4 + 2] = 255;
-        //                    data[i * 4 + 3] = 255;
-        //                }
-        //                else
-        //                {
-        //                    data[i * 4 + 0] = 0;
-        //                    data[i * 4 + 1] = 0;
-        //                    data[i * 4 + 2] = 0;
-        //                    data[i * 4 + 3] = 0;
-        //                }
-        //                //if ((x % 2) == (y % 2))
-        //                //{
-        //                //    data[i * 4 + 0] = 128;
-        //                //    data[i * 4 + 1] = 0;
-        //                //    data[i * 4 + 2] = 128;
-        //                //    data[i * 4 + 3] = 255;
-        //                //}
-        //                }
-        //            }
-        //        }
-        //    }
-        //    layout.channelCount = channelCount;
-        //
-        //    string json = JsonSerializer.Serialize(layout, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
-        //
-        //    File.WriteAllText(f2.FileName, json);
-        //    string name = Path.GetFileNameWithoutExtension(f2.FileName);
-        //    string dir = Path.GetDirectoryName(f2.FileName);
-        //    Utils.WritePng(dir + "\\" + name + "_mask.png", data, sizeX, sizeY);
-        //}
-
         Dictionary<int, (int x, int y)> layoutMapping;
 
         
@@ -560,6 +429,12 @@ namespace FuralityGridNode
             layoutMapping = new Dictionary<int, (int x, int y)>();
             for (int i = 0; i < layout.coords.Count; i++)
             {
+                if (layout.coords[i].uvX < 0 || layout.coords[i].uvX > 1 || layout.coords[i].uvY < 0 || layout.coords[i].uvY > 1)
+                {
+                    MessageBox.Show("Layout file had data outside of the screen and will not load.", "Layout file error.");
+                    layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
+                    return;
+                }
                 layoutMapping.Add(i, ((layout.coords[i].dmxX), (layout.coords[i].dmxY)));
             }
 
