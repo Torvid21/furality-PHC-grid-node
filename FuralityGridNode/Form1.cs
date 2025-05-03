@@ -207,10 +207,10 @@ namespace FuralityGridNode
                 }
                 else
                 {
-                    //var frigFile = new FRigFile();
-                    //var frigBaseFile = FuralityGridNode.Properties.Resources.FrigBaseDebug;
-                    //var frigBase = Encoding.UTF8.GetString(frigBaseFile);
-                    //currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
+                    var frigFile = new FRigFile();
+                    var frigBaseFile = FuralityGridNode.Properties.Resources.Blockout;
+                    var frigBase = Encoding.UTF8.GetString(frigBaseFile);
+                    currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
                 }
             }
             if (output == null)

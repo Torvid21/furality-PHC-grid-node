@@ -63,6 +63,16 @@ namespace FuralityGridNode.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] Blockout {
+            get {
+                object obj = ResourceManager.GetObject("Blockout", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] FrigBaseDebug {
             get {
                 object obj = ResourceManager.GetObject("FrigBaseDebug", resourceCulture);
@@ -76,6 +86,16 @@ namespace FuralityGridNode.Properties {
         internal static byte[] FynnGridNode {
             get {
                 object obj = ResourceManager.GetObject("FynnGridNode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] MiccaDebug {
+            get {
+                object obj = ResourceManager.GetObject("MiccaDebug", resourceCulture);
                 return ((byte[])(obj));
             }
         }
