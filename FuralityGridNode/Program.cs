@@ -15,7 +15,6 @@ namespace FuralityGridNode
             Trace.Listeners.Add(new TextWriterTraceListener(Console.Out));
             Trace.AutoFlush = true;
             Trace.Indent();
-            Trace.WriteLine("Entering Main");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());

@@ -118,10 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Blockout" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Blockout.frig;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="FrigBaseDebug" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\MiccaDebug.frig;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="FynnGridNode" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\FynnGridNode.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="MiccaDebug" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MiccaDebug.frig;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

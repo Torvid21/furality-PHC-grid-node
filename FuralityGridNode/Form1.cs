@@ -199,18 +199,18 @@ namespace FuralityGridNode
 
                         int color = fixture.GridColor;
 
-                        DrawColorSquare(preview, countX * previewScale, countY * previewScale, gridX * previewScale, gridY * previewScale, 1 * previewScale, 1 * previewScale, data, fixture.GridColor);
-                        DrawColorSquare(output, sizeX, sizeY, pixelX, pixelY, size, size, data, fixture.GridColor);
+                        DrawColorSquare(preview, countX * previewScale, countY * previewScale, gridX * previewScale, gridY * previewScale, 1 * previewScale, 1 * previewScale, data, fixture.GridColor, true);
+                        DrawColorSquare(output, sizeX, sizeY, pixelX, pixelY, size, size, data, fixture.GridColor, false);
 
                         index++;
                     }
                 }
                 else
                 {
-                    //var frigFile = new FRigFile();
-                    //var frigBaseFile = FuralityGridNode.Properties.Resources.FrigBaseDebug;
-                    //var frigBase = Encoding.UTF8.GetString(frigBaseFile);
-                    //currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
+                    var frigFile = new FRigFile();
+                    var frigBaseFile = FuralityGridNode.Properties.Resources.Blockout;
+                    var frigBase = Encoding.UTF8.GetString(frigBaseFile);
+                    currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
                 }
             }
             if (output == null)
@@ -239,7 +239,7 @@ namespace FuralityGridNode
             pinnedArray.Free();
         }
 
-        private void DrawColorSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte dataIn, int selector)
+        private void DrawColorSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte dataIn, int selector, bool bgra)
         {
             for (int x = X; x < X + sizeX; x++)
             {
@@ -248,14 +248,20 @@ namespace FuralityGridNode
                     int index = (x + y * dataSizeX) * 4;
                     switch (selector) {
                         case 1:
-                            data[index + 2] = dataIn; // R
-                            break;
+                            if (bgra)
+                                data[index + 2] = dataIn; // R
+                            else
+                                data[index + 0] = dataIn;
+                                break;
                         case 2:
                             data[index + 1] = dataIn; // G
                             break;
                         case 3:
-                            data[index + 0] = dataIn; // B
-                            break;
+                            if (bgra)
+                                data[index + 0] = dataIn; // B
+                            else
+                                data[index + 2] = dataIn;
+                                break;
                         default:
                             data[index + 4] = dataIn; // A
                             data[index + 2] = dataIn; // R
@@ -332,6 +338,7 @@ namespace FuralityGridNode
 
         private void button2_Click(object sender, EventArgs e)
         {
+            Application.Exit();
             Environment.Exit(0);
         }
 
@@ -342,6 +349,7 @@ namespace FuralityGridNode
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Application.Exit();
             Environment.Exit(0);
         }
 
@@ -372,6 +380,12 @@ namespace FuralityGridNode
                     LoadFRigFile(filePath);
                 }
             }
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
+            Environment.Exit(0);
         }
 
         private FRig currentRig;
