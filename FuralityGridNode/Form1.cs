@@ -289,7 +289,7 @@ namespace FuralityGridNode
                 if (customLayout)
                     data = new byte[layoutMapping.Count*4];
                 else
-                    data = new byte[512 * 4];
+                    data = new byte[512 * 16];
 
                 for (int i = 0; i < data.Length; i++)
                 {
