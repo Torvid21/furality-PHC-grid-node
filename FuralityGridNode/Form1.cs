@@ -105,17 +105,32 @@ namespace FuralityGridNode
 
         void DrawSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte R, byte G, byte B, byte A)
         {
-            for (int x = X; x < X + sizeX; x++)
+            if (sizeX <= 0 || sizeY <= 0)
+                return;
+            if (X >= dataSizeX || Y >= dataSizeY)
+                return;
+            if (X + sizeX <= 0 || Y + sizeY <= 0)
+                return;
+
+            int startX = Math.Max(X, 0);
+            int startY = Math.Max(Y, 0);
+            int endX = Math.Min(X + sizeX, dataSizeX);
+            int endY = Math.Min(Y + sizeY, dataSizeY);
+
+            for (int y = startY; y < endY; y++)
             {
-                for (int y = Y; y < Y + sizeY; y++)
+                int rowIndex = (y * dataSizeX + startX) * 4;
+
+                for (int x = startX; x < endX; x++)
                 {
-                    int index = (x + y * dataSizeX) * 4;
-                    data[index + 0] = B; // R
-                    data[index + 1] = G; // G
-                    data[index + 2] = R; // B
-                    data[index + 3] = A; // A
+                    int idx = rowIndex + (x - startX) * 4;
+                    data[idx + 0] = B;  // B
+                    data[idx + 1] = G;  // G
+                    data[idx + 2] = R;  // R
+                    data[idx + 3] = A;  // A
                 }
             }
+
         }
 
         public void DrawData(byte[] combinedData)
@@ -225,7 +240,7 @@ namespace FuralityGridNode
                     for (int j = 0; j < 8; j++)
                     {
                         int y2 = y * 8 + j;
-                        var bit = (currentByte & (1 << j - 1)) != 0;
+                        var bit = (currentByte & (1 << (7-j))) != 0; // torvid skissue here
                         byte value = (byte)(bit ? 255 : 0);
                         DrawSquare(output, bladeSizeX, bladeSizeY, x * size, y2 * size, size, size, value, value, value, 255);
                     }
