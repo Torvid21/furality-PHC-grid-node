@@ -116,7 +116,8 @@ namespace FuralityGridNode
             this.colorTypeDropdown.Items.AddRange(new object[] {
             "VRSL",
             "Packed",
-            "FRig"});
+            "FRig",
+            "Binary"});
             this.colorTypeDropdown.Location = new System.Drawing.Point(10, 19);
             this.colorTypeDropdown.Name = "colorTypeDropdown";
             this.colorTypeDropdown.Size = new System.Drawing.Size(64, 21);
