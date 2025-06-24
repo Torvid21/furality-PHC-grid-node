@@ -103,6 +103,49 @@ namespace FuralityGridNode
         static string statusText = "";
         static string statusTextLast = "";
 
+
+        // CRC-8 (x⁸ + x² + x + 1)
+        public static byte Crc8For6(
+            byte b0, byte b1, byte b2,
+            byte b3, byte b4, byte b5)
+        {
+            uint crc = 0;
+            uint poly = 0x07;
+
+            uint[] data = { b0, b1, b2, b3, b4, b5 };
+            foreach (uint v in data)
+            {
+                crc ^= v;
+                for (int i = 0; i < 8; ++i)
+                    crc = (crc & 0x80) != 0
+                          ? ((crc << 1) ^ poly) & 0xFF
+                          : (crc << 1) & 0xFF;
+            }
+            return (byte)crc;
+        }
+
+        // CRC-4 (x⁴ + x + 1)
+        public static byte Crc4For6(
+            byte b0, byte b1, byte b2,
+            byte b3, byte b4, byte b5)
+        {
+            uint crc = 0;
+            uint poly = 0x03;
+
+            uint[] data = { b0, b1, b2, b3, b4, b5 };
+            foreach (uint v in data)
+            {
+                for (int bit = 7; bit >= 0; --bit)
+                {
+                    uint inBit = (v >> bit) & 1;
+                    uint top = (crc >> 3) & 1;
+                    crc = ((crc << 1) | inBit) & 0xF;
+                    if (top == 1) crc ^= poly;
+                }
+            }
+            return (byte)(crc << 4); // put crc on the left and pad 0s
+        }
+
         void DrawSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte R, byte G, byte B, byte A)
         {
             if (sizeX <= 0 || sizeY <= 0)
@@ -130,17 +173,31 @@ namespace FuralityGridNode
                     data[idx + 3] = A;  // A
                 }
             }
-
         }
-
+        void DrawSquareBinary(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, bool value)
+        {
+            DrawSquare(data, dataSizeX, dataSizeY, X, Y, sizeX, sizeY,
+                value ? (byte)255 : (byte)0,
+                value ? (byte)255 : (byte)0,
+                value ? (byte)255 : (byte)0, 255);
+        }
+        bool GetBit(byte currentByte, int index)
+        {
+            return (currentByte & (1 << index)) != 0;
+        }
         public void DrawData(byte[] combinedData)
         {
+            bladeSizeX = 1920;
+            bladeSizeY = 208;
             byte[] output = new byte[bladeSizeX * bladeSizeY * 4];
 
             string selectedItem = colorTypeDropdown.SelectedItem as string;
-#if DEBUG
-            //selectedItem = "FRig";
-#endif
+
+            largeCRC.Enabled = (selectedItem == "Binary");
+            selectRig.Enabled = (selectedItem == "FRig");
+            LoadLayout.Enabled = !(selectedItem == "Binary");
+            UnloadLayout.Enabled = !(selectedItem == "Binary");
+
             if (selectedItem == "VRSL")
             {
                 int size = 16;
@@ -231,6 +288,17 @@ namespace FuralityGridNode
             }
             else if (selectedItem == "Binary")
             {
+                if (largeCRC.Checked)
+                {
+                    bladeSizeX = 1920;
+                    bladeSizeY = 224;
+                }
+                else
+                {
+                    bladeSizeX = 1920;
+                    bladeSizeY = 208;
+                }
+                output = new byte[bladeSizeX * bladeSizeY * 4];
                 int size = 4;
                 for (int i = 0; i < combinedData.Length; i++)
                 {
@@ -240,9 +308,44 @@ namespace FuralityGridNode
                     for (int j = 0; j < 8; j++)
                     {
                         int y2 = y * 8 + j;
-                        var bit = (currentByte & (1 << (7-j))) != 0; // torvid skissue here
-                        byte value = (byte)(bit ? 255 : 0);
-                        DrawSquare(output, bladeSizeX, bladeSizeY, x * size, y2 * size, size, size, value, value, value, 255);
+                        bool value = GetBit(currentByte, 7 - j);
+                        DrawSquareBinary(output, bladeSizeX, bladeSizeY, x * size, y2 * size, size, size, value);
+                    }
+                    // at the end of each row, calculate crc
+                    if (y == 5) 
+                    {
+                        byte mask = 0;
+
+                        if (largeCRC.Checked)
+                        {
+                            mask = Crc8For6(
+                                combinedData[i - 5],
+                                combinedData[i - 4],
+                                combinedData[i - 3],
+                                combinedData[i - 2],
+                                combinedData[i - 1],
+                                combinedData[i - 0]);
+                            for (int j = 0; j < 8; j++)
+                            {
+                                bool value = GetBit(mask, j);
+                                DrawSquareBinary(output, bladeSizeX, bladeSizeY, x * size, (6 * 8 + j) * size, size, size, value);
+                            }
+                        }
+                        else
+                        {
+                            mask = Crc4For6(
+                                combinedData[i - 5],
+                                combinedData[i - 4],
+                                combinedData[i - 3],
+                                combinedData[i - 2],
+                                combinedData[i - 1],
+                                combinedData[i - 0]);
+                            for (int j = 0; j < 4; j++)
+                            {
+                                bool value = GetBit(mask, j+4);
+                                DrawSquareBinary(output, bladeSizeX, bladeSizeY, x * size, (6 * 8 + j) * size, size, size, value);
+                            }
+                        }
                     }
                 }
             }
@@ -252,8 +355,10 @@ namespace FuralityGridNode
             SpoutWrapper.SendImage(output, bladeSizeX, bladeSizeY);
 
 
-            // Preview!
-            int previewScale = 4;
+            // Draw preview!
+            int previewScale = 8;
+            if(selectedItem == "Binary")
+                previewScale = 4;
             int previewSizeX = (bladeSizeX / previewScale);
             int previewSizeY = (bladeSizeY / previewScale);
             byte[] preview = new byte[previewSizeX * previewSizeY * 4];
