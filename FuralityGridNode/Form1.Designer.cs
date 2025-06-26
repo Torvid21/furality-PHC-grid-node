@@ -36,6 +36,7 @@ namespace FuralityGridNode
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gridPreview = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.largeCRC = new System.Windows.Forms.CheckBox();
             this.layoutStatus = new System.Windows.Forms.Label();
             this.colorTypeDropdown = new System.Windows.Forms.ComboBox();
             this.UnloadLayout = new System.Windows.Forms.Button();
@@ -54,9 +55,8 @@ namespace FuralityGridNode
             this.testAnimation = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.largeCRC = new System.Windows.Forms.CheckBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -108,6 +108,16 @@ namespace FuralityGridNode
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Rig";
+            // 
+            // largeCRC
+            // 
+            this.largeCRC.AutoSize = true;
+            this.largeCRC.Location = new System.Drawing.Point(153, 15);
+            this.largeCRC.Name = "largeCRC";
+            this.largeCRC.Size = new System.Drawing.Size(71, 17);
+            this.largeCRC.TabIndex = 15;
+            this.largeCRC.Text = "8-bit CRC";
+            this.largeCRC.UseVisualStyleBackColor = true;
             // 
             // layoutStatus
             // 
@@ -293,14 +303,6 @@ namespace FuralityGridNode
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Tools";
             // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(6, 51);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(175, 20);
-            this.textBox1.TabIndex = 13;
-            this.textBox1.Text = "5, 20-45, 32, 800-900";
-            // 
             // label4
             // 
             this.label4.AutoSize = true;
@@ -310,15 +312,13 @@ namespace FuralityGridNode
             this.label4.TabIndex = 16;
             this.label4.Text = "Mask";
             // 
-            // largeCRC
+            // textBox1
             // 
-            this.largeCRC.AutoSize = true;
-            this.largeCRC.Location = new System.Drawing.Point(153, 15);
-            this.largeCRC.Name = "largeCRC";
-            this.largeCRC.Size = new System.Drawing.Size(71, 17);
-            this.largeCRC.TabIndex = 15;
-            this.largeCRC.Text = "8-bit CRC";
-            this.largeCRC.UseVisualStyleBackColor = true;
+            this.textBox1.Location = new System.Drawing.Point(6, 51);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(175, 20);
+            this.textBox1.TabIndex = 13;
+            this.textBox1.Text = "5, 20-45, 32, 800-900";
             // 
             // Form1
             // 

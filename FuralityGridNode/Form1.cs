@@ -209,6 +209,8 @@ namespace FuralityGridNode
                     {
                         int channel = i + universe * 512;
                         byte data = combinedData[channel];
+
+                        channel = i + universe * 520;
                         int x = channel / countY;
                         int y = channel % countY;
 
