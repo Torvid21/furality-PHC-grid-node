@@ -38,7 +38,7 @@ namespace FuralityGridNode
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.largeCRC = new System.Windows.Forms.CheckBox();
             this.layoutStatus = new System.Windows.Forms.Label();
-            this.colorTypeDropdown = new System.Windows.Forms.ComboBox();
+            this.rigTypeDropdown = new System.Windows.Forms.ComboBox();
             this.UnloadLayout = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.selectRig = new System.Windows.Forms.Button();
@@ -97,7 +97,7 @@ namespace FuralityGridNode
             // 
             this.groupBox2.Controls.Add(this.largeCRC);
             this.groupBox2.Controls.Add(this.layoutStatus);
-            this.groupBox2.Controls.Add(this.colorTypeDropdown);
+            this.groupBox2.Controls.Add(this.rigTypeDropdown);
             this.groupBox2.Controls.Add(this.UnloadLayout);
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.selectRig);
@@ -127,21 +127,21 @@ namespace FuralityGridNode
             this.layoutStatus.TabIndex = 13;
             this.layoutStatus.Text = "VRSL\r\nsize: 1920x208\r\nchannels: 1560";
             // 
-            // colorTypeDropdown
+            // rigTypeDropdown
             // 
-            this.colorTypeDropdown.FormattingEnabled = true;
-            this.colorTypeDropdown.Items.AddRange(new object[] {
+            this.rigTypeDropdown.FormattingEnabled = true;
+            this.rigTypeDropdown.Items.AddRange(new object[] {
             "VRSL",
             "Packed",
             "FRig",
             "Binary"});
-            this.colorTypeDropdown.Location = new System.Drawing.Point(10, 19);
-            this.colorTypeDropdown.Name = "colorTypeDropdown";
-            this.colorTypeDropdown.Size = new System.Drawing.Size(64, 21);
-            this.colorTypeDropdown.TabIndex = 7;
-            this.colorTypeDropdown.Text = "FRig";
-            this.colorTypeDropdown.SelectedIndexChanged += new System.EventHandler(this.colorTypeDropdown_SelectedIndexChanged);
-            this.colorTypeDropdown.TextChanged += new System.EventHandler(this.inputChanged_TextChanged);
+            this.rigTypeDropdown.Location = new System.Drawing.Point(10, 19);
+            this.rigTypeDropdown.Name = "rigTypeDropdown";
+            this.rigTypeDropdown.Size = new System.Drawing.Size(64, 21);
+            this.rigTypeDropdown.TabIndex = 7;
+            this.rigTypeDropdown.Text = "FRig";
+            this.rigTypeDropdown.SelectedIndexChanged += new System.EventHandler(this.colorTypeDropdown_SelectedIndexChanged);
+            this.rigTypeDropdown.TextChanged += new System.EventHandler(this.inputChanged_TextChanged);
             // 
             // UnloadLayout
             // 
@@ -254,7 +254,6 @@ namespace FuralityGridNode
             this.unicast.TabIndex = 11;
             this.unicast.Text = "Unicast";
             this.unicast.UseVisualStyleBackColor = true;
-            this.unicast.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // connect
             // 
@@ -338,6 +337,7 @@ namespace FuralityGridNode
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "Furality Grid Node";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.contextMenuStrip1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
@@ -359,7 +359,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.TextBox portInput;
         private System.Windows.Forms.TextBox ipInput;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.ComboBox colorTypeDropdown;
+        private System.Windows.Forms.ComboBox rigTypeDropdown;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
         private System.Windows.Forms.Button connect;
         private System.Windows.Forms.Button selectRig;

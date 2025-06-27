@@ -17,9 +17,36 @@ namespace FuralityGridNode
         static int bladeSizeX = 1920;
         static int bladeSizeY = 208;
         static bool customLayout;
-        static bool unicastCheck = true;
-
         private ArtNet artnetClient;
+
+        [Serializable]
+        class FuralityGridNodeSettings
+        {
+            public string ArtNetAddress;
+            public string ArtNetPort;
+            public bool Unicast;
+            public string RigType;
+        }
+
+        public void SaveSettings()
+        {
+            FuralityGridNodeSettings settings = new FuralityGridNodeSettings();
+            settings.ArtNetAddress = ipInput.Text;
+            settings.ArtNetPort = portInput.Text;
+            settings.Unicast = unicast.Checked;
+            settings.RigType = rigTypeDropdown.SelectedItem.ToString();
+            string json = JsonSerializer.Serialize<FuralityGridNodeSettings>(settings, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
+            File.WriteAllText("FuralityGridNodeSettings.json", json);
+        }
+        public void LoadSettings()
+        {
+            string json = File.ReadAllText("FuralityGridNodeSettings.json");
+            FuralityGridNodeSettings settings = JsonSerializer.Deserialize<FuralityGridNodeSettings>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
+            ipInput.Text = settings.ArtNetAddress;
+            portInput.Text = settings.ArtNetPort;
+            unicast.Checked = settings.Unicast;
+            rigTypeDropdown.SelectedItem = settings.RigType;
+        }
 
         public Form1()
         {
@@ -28,6 +55,15 @@ namespace FuralityGridNode
             form = this;
             this.MouseDown += new MouseEventHandler(MainForm_MouseDown);
             g.Clear(Color.Black);
+
+            if (!File.Exists("FuralityGridNodeSettings.json"))
+            {
+                SaveSettings();
+            }
+            else
+            {
+                LoadSettings();
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -191,7 +227,7 @@ namespace FuralityGridNode
             bladeSizeY = 208;
             byte[] output = new byte[bladeSizeX * bladeSizeY * 4];
 
-            string selectedItem = colorTypeDropdown.SelectedItem as string;
+            string selectedItem = rigTypeDropdown.SelectedItem as string;
 
             largeCRC.Enabled = (selectedItem == "Binary");
             selectRig.Enabled = (selectedItem == "FRig");
@@ -443,7 +479,6 @@ namespace FuralityGridNode
         void StartArtNetClient()
         {
             artnetClient = new ArtNet(ipInput.Text, portInput.Text);
-            artnetClient.Unicast = unicastCheck;
             artnetClient.StartClient();
         }
 
@@ -504,7 +539,8 @@ namespace FuralityGridNode
 
         private void colorTypeDropdown_SelectedIndexChanged(object sender, EventArgs e)
         {
-            DrawData(artnetClient.combinedData);
+            if (artnetClient != null)
+                DrawData(artnetClient.combinedData);
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -515,14 +551,18 @@ namespace FuralityGridNode
 
         private void inputChanged_TextChanged(object sender, EventArgs e)
         {
-            DrawData(artnetClient.combinedData);
+            if(artnetClient != null)
+                DrawData(artnetClient.combinedData);
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
             Trace.WriteLine("Button1 Clicked");
-            artnetClient.Unicast = unicastCheck;
-            artnetClient.RestartClient(ipInput.Text, portInput.Text);
+            if (artnetClient != null)
+            {
+                artnetClient.Unicast = unicast.Checked;
+                artnetClient.RestartClient(ipInput.Text, portInput.Text);
+            }
         }
 
         private void selectRig_Click(object sender, EventArgs e)
@@ -544,6 +584,10 @@ namespace FuralityGridNode
 
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
+        }
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveSettings();
             Application.Exit();
             Environment.Exit(0);
         }
@@ -575,6 +619,7 @@ namespace FuralityGridNode
             }
         }
 
+
         [Serializable]
         struct DMXCoord
         {
@@ -597,7 +642,6 @@ namespace FuralityGridNode
         }
         Dictionary<int, (int x, int y)> layoutMapping;
 
-        
         private void LoadLayout_Click(object sender, EventArgs e)
         {
             layoutStatus.Text = "Loading...";
@@ -643,16 +687,12 @@ namespace FuralityGridNode
             bladeSizeY = 208;
             layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
-        {
-            CheckBox checkBox = (CheckBox)sender;
-            unicastCheck = checkBox.Checked;
-        }
 
         float testAnimationTime = 0;
         private void testAnimation_Click(object sender, EventArgs e)
         {
             testAnimationTime = 1.0f;
         }
+
     }
 }
