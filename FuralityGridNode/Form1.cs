@@ -319,9 +319,11 @@ namespace FuralityGridNode
                 else
                 {
                     var frigFile = new FRigFile();
-                    var frigBaseFile = FuralityGridNode.Properties.Resources.Blockout;
-                    var frigBase = Encoding.UTF8.GetString(frigBaseFile);
-                    currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
+                    if (FuralityGridNode.Properties.Resources.Blockout != null)
+                    {
+                        var frigBase = Encoding.UTF8.GetString(FuralityGridNode.Properties.Resources.Blockout);
+                        currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
+                    }
                 }
             }
             else if (selectedItem == "Binary")
@@ -447,22 +449,22 @@ namespace FuralityGridNode
                             if (bgra)
                                 data[index + 2] = dataIn; // R
                             else
-                                data[index + 0] = dataIn;
+                                data[index] = dataIn;
                                 break;
                         case 2:
                             data[index + 1] = dataIn; // G
                             break;
                         case 3:
                             if (bgra)
-                                data[index + 0] = dataIn; // B
+                                data[index] = dataIn; // B
                             else
                                 data[index + 2] = dataIn;
                                 break;
                         default:
-                            data[index + 4] = dataIn; // A
+                            data[index + 3] = dataIn; // A
                             data[index + 2] = dataIn; // R
                             data[index + 1] = dataIn; // G
-                            data[index + 0] = dataIn; // B
+                            data[index] = dataIn; // B
                             break;
                     }
                 }
