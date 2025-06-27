@@ -121,9 +121,6 @@
   <data name="Blockout" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Blockout.frig;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="FrigBaseDebug" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\MiccaDebug.frig;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="FynnGridNode" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\FynnGridNode.ico;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
