@@ -36,6 +36,7 @@ namespace FuralityGridNode
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gridPreview = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.largeCRC = new System.Windows.Forms.CheckBox();
             this.layoutStatus = new System.Windows.Forms.Label();
             this.colorTypeDropdown = new System.Windows.Forms.ComboBox();
             this.UnloadLayout = new System.Windows.Forms.Button();
@@ -52,9 +53,14 @@ namespace FuralityGridNode
             this.connect = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.testAnimation = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -80,33 +86,44 @@ namespace FuralityGridNode
             // 
             // gridPreview
             // 
-            this.gridPreview.Location = new System.Drawing.Point(505, 7);
+            this.gridPreview.Location = new System.Drawing.Point(480, 7);
             this.gridPreview.Name = "gridPreview";
-            this.gridPreview.Size = new System.Drawing.Size(320, 180);
+            this.gridPreview.Size = new System.Drawing.Size(499, 180);
             this.gridPreview.TabIndex = 17;
             this.gridPreview.TabStop = false;
             this.gridPreview.Text = "Preview";
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.largeCRC);
             this.groupBox2.Controls.Add(this.layoutStatus);
             this.groupBox2.Controls.Add(this.colorTypeDropdown);
             this.groupBox2.Controls.Add(this.UnloadLayout);
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.selectRig);
             this.groupBox2.Controls.Add(this.LoadLayout);
-            this.groupBox2.Location = new System.Drawing.Point(258, 7);
+            this.groupBox2.Location = new System.Drawing.Point(244, 7);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(240, 209);
+            this.groupBox2.Size = new System.Drawing.Size(230, 209);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Rig";
+            // 
+            // largeCRC
+            // 
+            this.largeCRC.AutoSize = true;
+            this.largeCRC.Location = new System.Drawing.Point(153, 15);
+            this.largeCRC.Name = "largeCRC";
+            this.largeCRC.Size = new System.Drawing.Size(71, 17);
+            this.largeCRC.TabIndex = 15;
+            this.largeCRC.Text = "8-bit CRC";
+            this.largeCRC.UseVisualStyleBackColor = true;
             // 
             // layoutStatus
             // 
             this.layoutStatus.Location = new System.Drawing.Point(7, 130);
             this.layoutStatus.Name = "layoutStatus";
-            this.layoutStatus.Size = new System.Drawing.Size(227, 55);
+            this.layoutStatus.Size = new System.Drawing.Size(217, 55);
             this.layoutStatus.TabIndex = 13;
             this.layoutStatus.Text = "VRSL\r\nsize: 1920x208\r\nchannels: 1560";
             // 
@@ -116,7 +133,8 @@ namespace FuralityGridNode
             this.colorTypeDropdown.Items.AddRange(new object[] {
             "VRSL",
             "Packed",
-            "FRig"});
+            "FRig",
+            "Binary"});
             this.colorTypeDropdown.Location = new System.Drawing.Point(10, 19);
             this.colorTypeDropdown.Name = "colorTypeDropdown";
             this.colorTypeDropdown.Size = new System.Drawing.Size(64, 21);
@@ -175,7 +193,7 @@ namespace FuralityGridNode
             this.groupBox1.Controls.Add(this.connect);
             this.groupBox1.Location = new System.Drawing.Point(12, 7);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(240, 209);
+            this.groupBox1.Size = new System.Drawing.Size(226, 127);
             this.groupBox1.TabIndex = 15;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "ArtNet";
@@ -183,7 +201,7 @@ namespace FuralityGridNode
             // statusLabel
             // 
             this.statusLabel.AutoSize = true;
-            this.statusLabel.Location = new System.Drawing.Point(7, 117);
+            this.statusLabel.Location = new System.Drawing.Point(87, 96);
             this.statusLabel.Name = "statusLabel";
             this.statusLabel.Size = new System.Drawing.Size(37, 13);
             this.statusLabel.TabIndex = 12;
@@ -256,7 +274,7 @@ namespace FuralityGridNode
             // 
             // testAnimation
             // 
-            this.testAnimation.Location = new System.Drawing.Point(505, 193);
+            this.testAnimation.Location = new System.Drawing.Point(480, 191);
             this.testAnimation.Name = "testAnimation";
             this.testAnimation.Size = new System.Drawing.Size(122, 23);
             this.testAnimation.TabIndex = 15;
@@ -264,12 +282,51 @@ namespace FuralityGridNode
             this.testAnimation.UseVisualStyleBackColor = true;
             this.testAnimation.Click += new System.EventHandler(this.testAnimation_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(6, 19);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(122, 23);
+            this.button1.TabIndex = 15;
+            this.button1.Text = "Generate Mask Image";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.label4);
+            this.groupBox3.Controls.Add(this.textBox1);
+            this.groupBox3.Controls.Add(this.button1);
+            this.groupBox3.Location = new System.Drawing.Point(12, 140);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(226, 76);
+            this.groupBox3.TabIndex = 18;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Tools";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(187, 54);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(33, 13);
+            this.label4.TabIndex = 16;
+            this.label4.Text = "Mask";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(6, 51);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(175, 20);
+            this.textBox1.TabIndex = 13;
+            this.textBox1.Text = "5, 20-45, 32, 800-900";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(844, 224);
+            this.ClientSize = new System.Drawing.Size(992, 224);
             this.ContextMenuStrip = this.contextMenuStrip1;
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.testAnimation);
             this.Controls.Add(this.gridPreview);
             this.Controls.Add(this.groupBox2);
@@ -287,6 +344,8 @@ namespace FuralityGridNode
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -314,6 +373,11 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label layoutStatus;
         private System.Windows.Forms.GroupBox gridPreview;
         private System.Windows.Forms.Button testAnimation;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.CheckBox largeCRC;
     }
 }
 
