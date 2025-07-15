@@ -179,7 +179,10 @@ namespace FuralityGridNode
                     if (top == 1) crc ^= poly;
                 }
             }
-            return (byte)(crc << 4); // put crc on the left and pad 0s
+
+            crc = (crc << 4);
+
+            return (byte)crc; // put crc on the left and pad 0s
         }
 
         void DrawSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte R, byte G, byte B, byte A)
@@ -382,7 +385,7 @@ namespace FuralityGridNode
                                 combinedData[i - 0]);
                             for (int j = 0; j < 4; j++)
                             {
-                                bool value = GetBit(mask, j+4);
+                                bool value = GetBit(mask, 7 - j);
                                 DrawSquareBinary(output, bladeSizeX, bladeSizeY, x * size, (6 * 8 + j) * size, size, size, value);
                             }
                         }
