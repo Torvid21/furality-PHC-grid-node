@@ -452,7 +452,7 @@ namespace FuralityGridNode
                         byte mask = Crc4For6(combinedData[i - 5], combinedData[i - 4], combinedData[i - 3], combinedData[i - 2], combinedData[i - 1], combinedData[i - 0]);
                         for (int j = 0; j < 4; j++)
                         {
-                            bool value = GetBit(mask, j + 4);
+                            bool value = GetBit(mask, 7 - j);
                             SetPixel(rawData, bladeSizeX, bladeSizeY, x, (6 * 8 + j) + turboExpandOffset * (bladeSizeY / turboExpandSize), value);
                         }
                     }
