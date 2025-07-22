@@ -181,7 +181,10 @@ namespace FuralityGridNode
                     if (top == 1) crc ^= poly;
                 }
             }
-            return (byte)(crc << 4); // put crc on the left and pad 0s
+
+            crc = (crc << 4);
+
+            return (byte)crc; // put crc on the left and pad 0s
         }
 
         void SetPixel(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, byte R, byte G, byte B, byte A)
@@ -446,32 +449,12 @@ namespace FuralityGridNode
                     // at the end of each row, calculate crc
                     if (y == 5) 
                     {
-                        //byte mask = 0;
-                        //
-                        //if (largeCRC.Checked)
-                        //{
-                        //    mask = Crc8For6(
-                        //        combinedData[i - 5],
-                        //        combinedData[i - 4],
-                        //        combinedData[i - 3],
-                        //        combinedData[i - 2],
-                        //        combinedData[i - 1],
-                        //        combinedData[i - 0]);
-                        //    for (int j = 0; j < 8; j++)
-                        //    {
-                        //        bool value = GetBit(mask, j);
-                        //        SetPixel(rawData, bladeSizeX, bladeSizeY, x, (6 * 8 + j), value);
-                        //    }
-                        //}
-                        //else
-                        //{
                         byte mask = Crc4For6(combinedData[i - 5], combinedData[i - 4], combinedData[i - 3], combinedData[i - 2], combinedData[i - 1], combinedData[i - 0]);
                         for (int j = 0; j < 4; j++)
                         {
-                            bool value = GetBit(mask, j+4);
+                            bool value = GetBit(mask, j + 4);
                             SetPixel(rawData, bladeSizeX, bladeSizeY, x, (6 * 8 + j) + turboExpandOffset * (bladeSizeY / turboExpandSize), value);
                         }
-                        //}
                     }
                 }
                 
