@@ -57,6 +57,8 @@ namespace FuralityGridNode
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.turboExpand = new System.Windows.Forms.CheckBox();
+            this.slow = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -95,6 +97,8 @@ namespace FuralityGridNode
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.slow);
+            this.groupBox2.Controls.Add(this.turboExpand);
             this.groupBox2.Controls.Add(this.largeCRC);
             this.groupBox2.Controls.Add(this.layoutStatus);
             this.groupBox2.Controls.Add(this.rigTypeDropdown);
@@ -112,12 +116,13 @@ namespace FuralityGridNode
             // largeCRC
             // 
             this.largeCRC.AutoSize = true;
-            this.largeCRC.Location = new System.Drawing.Point(153, 15);
+            this.largeCRC.Location = new System.Drawing.Point(10, 183);
             this.largeCRC.Name = "largeCRC";
             this.largeCRC.Size = new System.Drawing.Size(71, 17);
             this.largeCRC.TabIndex = 15;
             this.largeCRC.Text = "8-bit CRC";
             this.largeCRC.UseVisualStyleBackColor = true;
+            this.largeCRC.Visible = false;
             // 
             // layoutStatus
             // 
@@ -319,6 +324,25 @@ namespace FuralityGridNode
             this.textBox1.TabIndex = 13;
             this.textBox1.Text = "5, 20-45, 32, 800-900";
             // 
+            // turboExpand
+            // 
+            this.turboExpand.AutoSize = true;
+            this.turboExpand.Location = new System.Drawing.Point(131, 21);
+            this.turboExpand.Name = "turboExpand";
+            this.turboExpand.Size = new System.Drawing.Size(93, 17);
+            this.turboExpand.TabIndex = 16;
+            this.turboExpand.Text = "Turbo Expand";
+            this.turboExpand.UseVisualStyleBackColor = true;
+            // 
+            // slow
+            // 
+            this.slow.AutoSize = true;
+            this.slow.Location = new System.Drawing.Point(120, 46);
+            this.slow.Name = "slow";
+            this.slow.Size = new System.Drawing.Size(28, 13);
+            this.slow.TabIndex = 17;
+            this.slow.Text = "slow";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -378,6 +402,8 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.CheckBox largeCRC;
+        private System.Windows.Forms.CheckBox turboExpand;
+        private System.Windows.Forms.Label slow;
     }
 }
 
