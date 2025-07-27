@@ -8,7 +8,8 @@ namespace FuralityGridNode
 {
     public class ArtNet
     {
-        public byte[] combinedData = new byte[512 * 8];
+        public const int maxUniverses = 32;
+        public byte[] combinedData = new byte[512 * maxUniverses];
 
         private static int listenPort = 6454;
         private static IPAddress listenAddress = IPAddress.Parse("2.0.0.2");
@@ -198,7 +199,7 @@ namespace FuralityGridNode
                 if (opcode == 0x5000)
                 {
                     int universe = (bytes[12 + 3] << 8) | bytes[12 + 2];
-                    if (universe < 8)
+                    if (universe < maxUniverses)
                     {
                         for (int i = 0; i < 512; i++)
                         {

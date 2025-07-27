@@ -31,11 +31,14 @@ namespace FuralityGridNode
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.helloToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gridPreview = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.slow = new System.Windows.Forms.Label();
+            this.turboExpand = new System.Windows.Forms.CheckBox();
             this.largeCRC = new System.Windows.Forms.CheckBox();
             this.layoutStatus = new System.Windows.Forms.Label();
             this.rigTypeDropdown = new System.Windows.Forms.ComboBox();
@@ -57,8 +60,7 @@ namespace FuralityGridNode
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.turboExpand = new System.Windows.Forms.CheckBox();
-            this.slow = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -112,6 +114,25 @@ namespace FuralityGridNode
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Rig";
+            // 
+            // slow
+            // 
+            this.slow.AutoSize = true;
+            this.slow.Location = new System.Drawing.Point(120, 46);
+            this.slow.Name = "slow";
+            this.slow.Size = new System.Drawing.Size(28, 13);
+            this.slow.TabIndex = 17;
+            this.slow.Text = "slow";
+            // 
+            // turboExpand
+            // 
+            this.turboExpand.AutoSize = true;
+            this.turboExpand.Location = new System.Drawing.Point(131, 21);
+            this.turboExpand.Name = "turboExpand";
+            this.turboExpand.Size = new System.Drawing.Size(93, 17);
+            this.turboExpand.TabIndex = 16;
+            this.turboExpand.Text = "Turbo Expand";
+            this.turboExpand.UseVisualStyleBackColor = true;
             // 
             // largeCRC
             // 
@@ -324,24 +345,15 @@ namespace FuralityGridNode
             this.textBox1.TabIndex = 13;
             this.textBox1.Text = "5, 20-45, 32, 800-900";
             // 
-            // turboExpand
+            // button2
             // 
-            this.turboExpand.AutoSize = true;
-            this.turboExpand.Location = new System.Drawing.Point(131, 21);
-            this.turboExpand.Name = "turboExpand";
-            this.turboExpand.Size = new System.Drawing.Size(93, 17);
-            this.turboExpand.TabIndex = 16;
-            this.turboExpand.Text = "Turbo Expand";
-            this.turboExpand.UseVisualStyleBackColor = true;
-            // 
-            // slow
-            // 
-            this.slow.AutoSize = true;
-            this.slow.Location = new System.Drawing.Point(120, 46);
-            this.slow.Name = "slow";
-            this.slow.Size = new System.Drawing.Size(28, 13);
-            this.slow.TabIndex = 17;
-            this.slow.Text = "slow";
+            this.button2.Location = new System.Drawing.Point(609, 191);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.TabIndex = 19;
+            this.button2.Text = "Midi Test";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click_1);
             // 
             // Form1
             // 
@@ -349,6 +361,7 @@ namespace FuralityGridNode
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(992, 224);
             this.ContextMenuStrip = this.contextMenuStrip1;
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.testAnimation);
             this.Controls.Add(this.gridPreview);
@@ -356,6 +369,7 @@ namespace FuralityGridNode
             this.Controls.Add(this.groupBox1);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
@@ -404,6 +418,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.CheckBox largeCRC;
         private System.Windows.Forms.CheckBox turboExpand;
         private System.Windows.Forms.Label slow;
+        private System.Windows.Forms.Button button2;
     }
 }
 

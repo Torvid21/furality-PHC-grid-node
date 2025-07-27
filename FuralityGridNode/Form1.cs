@@ -8,7 +8,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Windows.Forms;
+using Melanchall.DryWetMidi.Multimedia;
+using Melanchall.DryWetMidi.Core;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Melanchall.DryWetMidi.Common;
 
 namespace FuralityGridNode
 {
@@ -20,6 +23,11 @@ namespace FuralityGridNode
 
         static bool customLayout;
         private ArtNet artnetClient;
+
+        private byte[] midiData = new byte[512 * ArtNet.maxUniverses];
+        private int midiScanPosition = 0;
+
+        private OutputDevice midiOutput;
 
         [Serializable]
         class FuralityGridNodeSettings
@@ -66,6 +74,8 @@ namespace FuralityGridNode
             {
                 LoadSettings();
             }
+
+            midiOutput = OutputDevice.GetByName("loopMIDI Port");
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -459,6 +469,29 @@ namespace FuralityGridNode
                 }
                 
             }
+
+
+            //Midi updates
+            for (int i = 0; i < combinedData.Length; i++)
+            {
+                if (combinedData[i] != midiData[i] && i < 2048) //todo: allow higher than 4 universes :3
+                {
+                    midiData[i] = combinedData[i];
+
+                    NoteOnEvent noteOn = new NoteOnEvent();
+                    noteOn.Channel = (FourBitNumber) (i / 128);
+                    noteOn.NoteNumber = (SevenBitNumber) (i % 128);
+                    noteOn.Velocity = (SevenBitNumber) (combinedData[i] & 0xF);
+
+                    NoteOffEvent noteOff = new NoteOffEvent();
+                    noteOff.Channel = (FourBitNumber)(i / 128);
+                    noteOff.NoteNumber = (SevenBitNumber)(i % 128);
+                    noteOff.Velocity = (SevenBitNumber) ((combinedData[i] >> 4) & 0xF);
+
+                    midiOutput.SendEvent(noteOn);
+                    midiOutput.SendEvent(noteOff);
+                }
+            }
             
             debug += "render: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
             checkTimestamp = Stopwatch.GetTimestamp();
@@ -567,7 +600,7 @@ namespace FuralityGridNode
         {
             StartArtNetClient();
             SpoutWrapper.CreateSender("Furality Grid Node");
-            layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
+            //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 
         void StartArtNetClient()
@@ -789,5 +822,9 @@ namespace FuralityGridNode
             testAnimationTime = 1.0f;
         }
 
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+
+        }
     }
 }
