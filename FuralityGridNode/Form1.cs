@@ -26,6 +26,7 @@ namespace FuralityGridNode
 
         private byte[] midiData = new byte[512 * ArtNet.maxUniverses];
         private int midiScanPosition = 0;
+        private int midiCatchup = 0;
 
         private OutputDevice midiOutput;
 
@@ -36,6 +37,7 @@ namespace FuralityGridNode
             public string ArtNetPort;
             public bool Unicast;
             public string RigType;
+            public string MidiDevice;
         }
 
         public void SaveSettings()
@@ -45,6 +47,7 @@ namespace FuralityGridNode
             settings.ArtNetPort = portInput.Text;
             settings.Unicast = unicast.Checked;
             settings.RigType = rigTypeDropdown.SelectedItem.ToString();
+            settings.MidiDevice = midiDevice.SelectedItem.ToString();
             string json = JsonSerializer.Serialize<FuralityGridNodeSettings>(settings, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
             File.WriteAllText("FuralityGridNodeSettings.json", json);
         }
@@ -56,6 +59,7 @@ namespace FuralityGridNode
             portInput.Text = settings.ArtNetPort;
             unicast.Checked = settings.Unicast;
             rigTypeDropdown.SelectedItem = settings.RigType;
+            midiDevice.SelectedItem = settings.MidiDevice;
         }
 
         public Form1()
@@ -75,7 +79,8 @@ namespace FuralityGridNode
                 LoadSettings();
             }
 
-            midiOutput = OutputDevice.GetByName("loopMIDI Port");
+            populateMidi();
+            connectMidi();
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -470,27 +475,50 @@ namespace FuralityGridNode
                 
             }
 
-
-            //Midi updates
-            for (int i = 0; i < combinedData.Length; i++)
+            if (midiOutput != null)
             {
-                if (combinedData[i] != midiData[i] && i < 2048) //todo: allow higher than 4 universes :3
+                //Midi updates
+                int midiUpdates = 0;
+                for (int i = midiCatchup; i < combinedData.Length; i++)
                 {
-                    midiData[i] = combinedData[i];
+                    if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + 10)) && i < 2048) //todo: allow higher than 4 universes :3
+                    {
+                        midiUpdates++;
+                        if (midiUpdates > 200)
+                        {
+                            midiCatchup = i;
+                            midiStatus.Text = "Too many notes!";
+                            midiStatus.ForeColor = Color.Red;
+                            break;
+                        }
+                        midiData[i] = combinedData[i];
 
-                    NoteOnEvent noteOn = new NoteOnEvent();
-                    noteOn.Channel = (FourBitNumber) (i / 128);
-                    noteOn.NoteNumber = (SevenBitNumber) (i % 128);
-                    noteOn.Velocity = (SevenBitNumber) (combinedData[i] & 0xF);
+                        NoteOnEvent noteOn = new NoteOnEvent();
+                        noteOn.Channel = (FourBitNumber)(i / 128);
+                        noteOn.NoteNumber = (SevenBitNumber)(i % 128);
+                        noteOn.Velocity = (SevenBitNumber)(combinedData[i] & 0xF);
 
-                    NoteOffEvent noteOff = new NoteOffEvent();
-                    noteOff.Channel = (FourBitNumber)(i / 128);
-                    noteOff.NoteNumber = (SevenBitNumber)(i % 128);
-                    noteOff.Velocity = (SevenBitNumber) ((combinedData[i] >> 4) & 0xF);
+                        NoteOffEvent noteOff = new NoteOffEvent();
+                        noteOff.Channel = (FourBitNumber)(i / 128);
+                        noteOff.NoteNumber = (SevenBitNumber)(i % 128);
+                        noteOff.Velocity = (SevenBitNumber)((combinedData[i] >> 4) & 0xF);
 
-                    midiOutput.SendEvent(noteOn);
-                    midiOutput.SendEvent(noteOff);
+                        midiOutput.SendEvent(noteOn);
+                        midiOutput.SendEvent(noteOff);
+                    }
                 }
+
+                if (midiUpdates <= 200) {
+                    midiCatchup = 0;
+                    midiStatus.Text = "Connected";
+                    midiStatus.ForeColor = Color.Black;
+                }
+
+                midiScanPosition += 10;
+                if (midiScanPosition > 2048)
+                {
+                    midiScanPosition = 0;
+                } 
             }
             
             debug += "render: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
@@ -822,9 +850,75 @@ namespace FuralityGridNode
             testAnimationTime = 1.0f;
         }
 
-        private void button2_Click_1(object sender, EventArgs e)
+        private void groupBox3_Enter(object sender, EventArgs e)
         {
+ 
+        }
 
+        private void populateMidi()
+        {
+            string selected = null;
+            if (midiDevice.SelectedItem != null)
+            {
+                selected = midiDevice.SelectedItem.ToString();
+            }
+
+            midiDevice.Items.Clear();
+            ICollection<OutputDevice> devices = OutputDevice.GetAll();
+
+            midiDevice.Items.Add("(none)");
+            if (selected == null)
+            {
+                midiDevice.SelectedIndex = 0;
+            }
+
+            foreach (OutputDevice device in devices)
+            {
+                int t = midiDevice.Items.Add(device.Name);
+                if (device.Name == selected)
+                {
+                    midiDevice.SelectedIndex = t;
+                }
+            }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (midiDevice.SelectedIndex == 0)
+            {
+                midiStatus.Text = "Disconnected";
+                if (midiOutput != null)
+                    midiOutput.Dispose();
+                midiOutput = null;
+            }
+            else
+            {
+                connectMidi();
+            }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            connectMidi();
+        }
+
+        private void connectMidi()
+        {
+            if (midiOutput != null)
+            {
+                midiOutput.Dispose();
+                midiOutput = null;
+            }
+
+            try
+            {
+                midiOutput = OutputDevice.GetByName(midiDevice.SelectedItem.ToString());
+                midiStatus.Text = "Connected";
+            }
+            catch
+            {
+                midiStatus.Text = "Failed to connect";
+            }
         }
     }
 }
