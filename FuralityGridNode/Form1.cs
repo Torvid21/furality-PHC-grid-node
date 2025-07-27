@@ -27,6 +27,7 @@ namespace FuralityGridNode
         private byte[] midiData = new byte[512 * ArtNet.maxUniverses];
         private int midiScanPosition = 0;
         private int midiCatchup = 0;
+        private string midiSavedDevice = "";
 
         private OutputDevice midiOutput;
 
@@ -46,8 +47,8 @@ namespace FuralityGridNode
             settings.ArtNetAddress = ipInput.Text;
             settings.ArtNetPort = portInput.Text;
             settings.Unicast = unicast.Checked;
-            settings.RigType = rigTypeDropdown.SelectedItem.ToString();
-            settings.MidiDevice = midiDevice.SelectedItem.ToString();
+            settings.RigType = rigTypeDropdown.SelectedItem != null ? rigTypeDropdown.SelectedItem.ToString() : "VRSL";
+            settings.MidiDevice = midiDevice.SelectedItem != null ? midiDevice.SelectedItem.ToString() : "(none)";
             string json = JsonSerializer.Serialize<FuralityGridNodeSettings>(settings, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
             File.WriteAllText("FuralityGridNodeSettings.json", json);
         }
@@ -58,8 +59,8 @@ namespace FuralityGridNode
             ipInput.Text = settings.ArtNetAddress;
             portInput.Text = settings.ArtNetPort;
             unicast.Checked = settings.Unicast;
-            rigTypeDropdown.SelectedItem = settings.RigType;
-            midiDevice.SelectedItem = settings.MidiDevice;
+            rigTypeDropdown.SelectedItem = settings.RigType == null ? "VRSL" : settings.RigType;
+            midiSavedDevice = settings.MidiDevice;
         }
 
         public Form1()
@@ -69,6 +70,8 @@ namespace FuralityGridNode
             form = this;
             this.MouseDown += new MouseEventHandler(MainForm_MouseDown);
             g.Clear(Color.Black);
+
+            rigTypeDropdown.SelectedIndex = 0;
 
             if (!File.Exists("FuralityGridNodeSettings.json"))
             {
@@ -473,6 +476,9 @@ namespace FuralityGridNode
                     }
                 }
                 
+            } else
+            {
+                return;
             }
 
             if (midiOutput != null)
@@ -508,7 +514,8 @@ namespace FuralityGridNode
                     }
                 }
 
-                if (midiUpdates <= 200) {
+                if (midiUpdates <= 200)
+                {
                     midiCatchup = 0;
                     midiStatus.Text = "Connected";
                     midiStatus.ForeColor = Color.Black;
@@ -518,7 +525,7 @@ namespace FuralityGridNode
                 if (midiScanPosition > 2048)
                 {
                     midiScanPosition = 0;
-                } 
+                }
             }
             
             debug += "render: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
@@ -857,7 +864,7 @@ namespace FuralityGridNode
 
         private void populateMidi()
         {
-            string selected = null;
+            string selected = midiSavedDevice;
             if (midiDevice.SelectedItem != null)
             {
                 selected = midiDevice.SelectedItem.ToString();
@@ -895,6 +902,8 @@ namespace FuralityGridNode
             {
                 connectMidi();
             }
+
+            SaveSettings();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
