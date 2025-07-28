@@ -522,7 +522,7 @@ namespace FuralityGridNode
                         }
                     }
 
-                    if (midiUpdates < 64)
+                    if (midiUpdates < 100)
                     {
                         midiCatchup = 0;
                     }
@@ -547,11 +547,13 @@ namespace FuralityGridNode
                         midiStatus.Text = "Connected - Waiting";
                         midiStatus.ForeColor = Color.Black;
 
-                        midiWatchdog();
-                        midiUpdate = Stopwatch.GetTimestamp();
+                        logStream.Close();
+                        logStream = null;
+                        findVRCLog();
 
-                        //logStream.Close();
-                        //logStream = null;
+                        midiWatchdog();
+
+                        midiUpdate = Stopwatch.GetTimestamp();
                     }
                 }
             }
