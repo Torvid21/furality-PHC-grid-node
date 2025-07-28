@@ -27,7 +27,10 @@ namespace FuralityGridNode
         private byte[] midiData = new byte[512 * ArtNet.maxUniverses];
         private int midiScanPosition = 0;
         private int midiCatchup = 0;
+        private long midiUpdate = 0;
         private string midiSavedDevice = "";
+
+        private FileStream logStream;
 
         private OutputDevice midiOutput;
 
@@ -483,48 +486,73 @@ namespace FuralityGridNode
 
             if (midiOutput != null)
             {
-                //Midi updates
-                int midiUpdates = 0;
-                for (int i = midiCatchup; i < combinedData.Length; i++)
+                if (isMidiReady())
                 {
-                    if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + 10)) && i < 2048) //todo: allow higher than 4 universes :3
+                    //Midi updates
+                    int midiUpdates = 0;
+                    for (int i = midiCatchup; i < combinedData.Length; i++)
                     {
-                        midiUpdates++;
-                        if (midiUpdates > 200)
+                        if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + 10)) && i < 2048) //todo: allow higher than 4 universes :3
                         {
-                            midiCatchup = i;
-                            midiStatus.Text = "Too many notes!";
-                            midiStatus.ForeColor = Color.Red;
-                            break;
+                            midiUpdates++;
+                            if (midiUpdates >= 100)
+                            {
+                                midiCatchup = i;
+                                break;
+                            }
+                            midiData[i] = combinedData[i];
+
+                            if (i < 1024)
+                            {
+                                int t = i;
+                                NoteOnEvent noteOn = new NoteOnEvent();
+                                noteOn.Channel = (FourBitNumber)((t >> 6) & 0xF);
+                                noteOn.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
+                                noteOn.Velocity = (SevenBitNumber)(combinedData[i] & 0x7F);
+                                midiOutput.SendEvent(noteOn);
+                            }
+                            else {
+                                int t = i - 1024;
+                                NoteOffEvent noteOff = new NoteOffEvent();
+                                noteOff.Channel = (FourBitNumber)((t >> 6) & 0xF);
+                                noteOff.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
+                                noteOff.Velocity = (SevenBitNumber)(combinedData[i] & 0x7F);
+                                midiOutput.SendEvent(noteOff);
+                            }
                         }
-                        midiData[i] = combinedData[i];
-
-                        NoteOnEvent noteOn = new NoteOnEvent();
-                        noteOn.Channel = (FourBitNumber)(i / 128);
-                        noteOn.NoteNumber = (SevenBitNumber)(i % 128);
-                        noteOn.Velocity = (SevenBitNumber)(combinedData[i] & 0xF);
-
-                        NoteOffEvent noteOff = new NoteOffEvent();
-                        noteOff.Channel = (FourBitNumber)(i / 128);
-                        noteOff.NoteNumber = (SevenBitNumber)(i % 128);
-                        noteOff.Velocity = (SevenBitNumber)((combinedData[i] >> 4) & 0xF);
-
-                        midiOutput.SendEvent(noteOn);
-                        midiOutput.SendEvent(noteOff);
                     }
-                }
 
-                if (midiUpdates <= 200)
-                {
-                    midiCatchup = 0;
-                    midiStatus.Text = "Connected";
+                    if (midiUpdates < 64)
+                    {
+                        midiCatchup = 0;
+                    }
+
+                    midiStatus.Text = "Connected - Sending Data";
                     midiStatus.ForeColor = Color.Black;
-                }
 
-                midiScanPosition += 10;
-                if (midiScanPosition > 2048)
+                    midiScanPosition += 10;
+                    if (midiScanPosition > 2048)
+                    {
+                        midiScanPosition = 0;
+                    }
+
+                    midiWatchdog();
+                    midiUpdate = Stopwatch.GetTimestamp();
+                } else
                 {
-                    midiScanPosition = 0;
+                    float midiTimeout = (float) (Stopwatch.GetTimestamp() - midiUpdate) / (float) Stopwatch.Frequency;
+                    if (midiTimeout > 1)
+                    {
+                        midiCatchup = 0;
+                        midiStatus.Text = "Connected - Waiting";
+                        midiStatus.ForeColor = Color.Black;
+
+                        midiWatchdog();
+                        midiUpdate = Stopwatch.GetTimestamp();
+
+                        //logStream.Close();
+                        //logStream = null;
+                    }
                 }
             }
             
@@ -921,13 +949,86 @@ namespace FuralityGridNode
 
             try
             {
-                midiOutput = OutputDevice.GetByName(midiDevice.SelectedItem.ToString());
-                midiStatus.Text = "Connected";
+                if (midiDevice.SelectedItem != null)
+                {
+                    midiOutput = OutputDevice.GetByName(midiDevice.SelectedItem.ToString());
+                    midiStatus.Text = "Connected";
+                }
+                else
+                {
+                    midiStatus.Text = "Failed to connect";
+                }
             }
             catch
             {
                 midiStatus.Text = "Failed to connect";
             }
+        }
+
+        private void findVRCLog()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string[] logs = Directory.GetFiles(path + "\\..\\LocalLow\\VRChat\\VRChat", "output_log_*.txt", SearchOption.TopDirectoryOnly);
+            if (logs.Length == 0) return;
+
+            Array.Sort(logs);
+            string log = logs[logs.Length - 1];
+
+            //Editor!!
+            //log = "C:\\Users\\Micca\\AppData\\Local\\Unity\\Editor\\Editor.log";
+
+            logStream = new FileStream(log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+
+            //forward to the end to wait on it
+            logStream.Position = logStream.Length - 1;
+
+            //logStream.ReadTimeout = 10;
+        }
+
+        private bool isMidiReady()
+        {
+            if (logStream == null)
+            {
+                findVRCLog();
+                return false;
+            }
+
+            int length = (int) (logStream.Length - logStream.Position);
+
+            byte[] searchWord = { (byte) 'M', (byte)'I', (byte)'D', (byte)'I', (byte)'R', (byte)'E', (byte)'A', (byte)'D', (byte)'Y', };
+
+            if (length > 1)
+            {
+                int c;
+                int i = 0;
+                while ((c = logStream.ReadByte()) != -1) { 
+                    if (c == searchWord[i])
+                    {
+                        i++;
+
+                        if (i >= searchWord.Length)
+                        {
+                            logStream.Position = logStream.Length - 1;
+                            return true;
+                        }
+                    }
+                }
+            } else
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+        private void midiWatchdog()
+        {
+            ControlChangeEvent midiWD = new ControlChangeEvent();
+            midiWD.Channel = (FourBitNumber)15;
+            midiWD.ControlNumber = (SevenBitNumber)127;
+            midiWD.ControlValue = (SevenBitNumber)127;
+
+            midiOutput.SendEvent(midiWD);
         }
     }
 }
