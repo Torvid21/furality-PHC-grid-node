@@ -547,11 +547,7 @@ namespace FuralityGridNode
                         midiStatus.Text = "Connected - Waiting";
                         midiStatus.ForeColor = Color.Black;
 
-                        logStream.Close();
-                        logStream = null;
-                        findVRCLog();
-
-                        midiWatchdog();
+                        midiReset();
 
                         midiUpdate = Stopwatch.GetTimestamp();
                     }
@@ -889,7 +885,7 @@ namespace FuralityGridNode
 
         private void groupBox3_Enter(object sender, EventArgs e)
         {
- 
+            
         }
 
         private void populateMidi()
@@ -938,7 +934,9 @@ namespace FuralityGridNode
 
         private void button1_Click_1(object sender, EventArgs e)
         {
+            populateMidi();
             connectMidi();
+            midiReset();
         }
 
         private void connectMidi()
@@ -977,7 +975,10 @@ namespace FuralityGridNode
             string log = logs[logs.Length - 1];
 
             //Editor!!
-            //log = "C:\\Users\\Micca\\AppData\\Local\\Unity\\Editor\\Editor.log";
+            if (editorCheck.Checked)
+            {
+                log = path + "\\..\\Local\\Unity\\Editor\\Editor.log";
+            }
 
             logStream = new FileStream(log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
@@ -1031,6 +1032,19 @@ namespace FuralityGridNode
             midiWD.ControlValue = (SevenBitNumber)127;
 
             midiOutput.SendEvent(midiWD);
+        }
+
+        private void midiReset()
+        {
+            logStream.Close();
+            logStream = null;
+            findVRCLog();
+            midiWatchdog();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            midiReset();
         }
     }
 }
