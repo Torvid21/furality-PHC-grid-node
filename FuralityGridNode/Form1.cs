@@ -1026,18 +1026,24 @@ namespace FuralityGridNode
 
         private void midiWatchdog()
         {
-            ControlChangeEvent midiWD = new ControlChangeEvent();
-            midiWD.Channel = (FourBitNumber)15;
-            midiWD.ControlNumber = (SevenBitNumber)127;
-            midiWD.ControlValue = (SevenBitNumber)127;
+            if (midiOutput != null)
+            {
+                ControlChangeEvent midiWD = new ControlChangeEvent();
+                midiWD.Channel = (FourBitNumber)15;
+                midiWD.ControlNumber = (SevenBitNumber)127;
+                midiWD.ControlValue = (SevenBitNumber)127;
 
-            midiOutput.SendEvent(midiWD);
+                midiOutput.SendEvent(midiWD);
+            }
         }
 
         private void midiReset()
         {
-            logStream.Close();
-            logStream = null;
+            if (logStream != null)
+            {
+                logStream.Close();
+                logStream = null;
+            }
             findVRCLog();
             midiWatchdog();
         }
