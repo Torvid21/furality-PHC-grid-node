@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Melanchall.DryWetMidi.Common;
+using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Multimedia;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -7,11 +10,9 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows.Forms;
-using Melanchall.DryWetMidi.Multimedia;
-using Melanchall.DryWetMidi.Core;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using Melanchall.DryWetMidi.Common;
 
 namespace FuralityGridNode
 {
@@ -29,6 +30,7 @@ namespace FuralityGridNode
         private int midiCatchup = 0;
         private long midiUpdate = 0;
         private string midiSavedDevice = "";
+        private int bankStatus = 0;
 
         private FileStream logStream;
 
@@ -967,6 +969,12 @@ namespace FuralityGridNode
 
         private void findVRCLog()
         {
+            if (logStream != null)
+            {
+                logStream.Close();
+                logStream = null;
+            }
+
             string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             string[] logs = Directory.GetFiles(path + "\\..\\LocalLow\\VRChat\\VRChat", "output_log_*.txt", SearchOption.TopDirectoryOnly);
             if (logs.Length == 0) return;
@@ -1024,27 +1032,52 @@ namespace FuralityGridNode
             return false;
         }
 
+        //Todo: Wait for callback to ensure the bank swap was triggered
+        private void ChangeBanks(int bank)
+        {
+            bankStatus = bank;
+
+            SendMidiControl(15, 127, bank);
+        }
+
         private void midiWatchdog()
         {
             if (midiOutput != null)
             {
+                SendMidiControl(15, 127, 127);
+            }
+        }
+
+        private void SendMidiControl(int channel, int control, int value)
+        {
+            if (midiOutput != null)
+            {
                 ControlChangeEvent midiWD = new ControlChangeEvent();
-                midiWD.Channel = (FourBitNumber)15;
-                midiWD.ControlNumber = (SevenBitNumber)127;
-                midiWD.ControlValue = (SevenBitNumber)127;
+                midiWD.Channel = (FourBitNumber)channel;
+                midiWD.ControlNumber = (SevenBitNumber)control;
+                midiWD.ControlValue = (SevenBitNumber)value;
 
                 midiOutput.SendEvent(midiWD);
             }
         }
 
+        //Unlocks world receiver
+        private void midiKnock()
+        {
+            SendMidiControl(15, 127, 101);
+            SendMidiControl(15, 127, 120);
+            SendMidiControl(15, 127, 107);
+        }
+
         private void midiReset()
         {
-            if (logStream != null)
-            {
-                logStream.Close();
-                logStream = null;
-            }
+            midiData = new byte[16384];
+            midiScanPosition = 0;
+            midiCatchup = 0;
+
             findVRCLog();
+            ChangeBanks(0);
+            midiKnock();
             midiWatchdog();
         }
 
