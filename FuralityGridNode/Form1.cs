@@ -991,7 +991,10 @@ namespace FuralityGridNode
             logStream = new FileStream(log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
             //forward to the end to wait on it
-            logStream.Position = logStream.Length - 1;
+            if (logStream.Length != 0)
+            {
+                logStream.Position = logStream.Length - 1;
+            }
 
             //logStream.ReadTimeout = 10;
         }
