@@ -57,10 +57,10 @@ namespace FuralityGridNode
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.testAnimation = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.editorCheck = new System.Windows.Forms.CheckBox();
             this.midiStatus = new System.Windows.Forms.Label();
             this.midiConnect = new System.Windows.Forms.Button();
             this.midiDevice = new System.Windows.Forms.ComboBox();
-            this.editorCheck = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -96,7 +96,7 @@ namespace FuralityGridNode
             this.gridPreview.Size = new System.Drawing.Size(499, 180);
             this.gridPreview.TabIndex = 17;
             this.gridPreview.TabStop = false;
-            this.gridPreview.Text = "Preview";
+            this.gridPreview.Text = "Spout Output";
             // 
             // groupBox2
             // 
@@ -119,11 +119,10 @@ namespace FuralityGridNode
             // slow
             // 
             this.slow.AutoSize = true;
-            this.slow.Location = new System.Drawing.Point(120, 46);
+            this.slow.Location = new System.Drawing.Point(128, 68);
             this.slow.Name = "slow";
-            this.slow.Size = new System.Drawing.Size(28, 13);
+            this.slow.Size = new System.Drawing.Size(0, 13);
             this.slow.TabIndex = 17;
-            this.slow.Text = "slow";
             // 
             // turboExpand
             // 
@@ -138,7 +137,7 @@ namespace FuralityGridNode
             // largeCRC
             // 
             this.largeCRC.AutoSize = true;
-            this.largeCRC.Location = new System.Drawing.Point(10, 183);
+            this.largeCRC.Location = new System.Drawing.Point(131, 41);
             this.largeCRC.Name = "largeCRC";
             this.largeCRC.Size = new System.Drawing.Size(71, 17);
             this.largeCRC.TabIndex = 15;
@@ -152,7 +151,7 @@ namespace FuralityGridNode
             this.layoutStatus.Name = "layoutStatus";
             this.layoutStatus.Size = new System.Drawing.Size(217, 55);
             this.layoutStatus.TabIndex = 13;
-            this.layoutStatus.Text = "VRSL\r\nsize: 1920x208\r\nchannels: 1560";
+            this.layoutStatus.Click += new System.EventHandler(this.layoutStatus_Click);
             // 
             // rigTypeDropdown
             // 
@@ -322,6 +321,17 @@ namespace FuralityGridNode
             this.groupBox3.Text = "MIDIDMX";
             this.groupBox3.Enter += new System.EventHandler(this.groupBox3_Enter);
             // 
+            // editorCheck
+            // 
+            this.editorCheck.AutoSize = true;
+            this.editorCheck.Location = new System.Drawing.Point(6, 51);
+            this.editorCheck.Name = "editorCheck";
+            this.editorCheck.Size = new System.Drawing.Size(65, 17);
+            this.editorCheck.TabIndex = 12;
+            this.editorCheck.Text = "In Editor";
+            this.editorCheck.UseVisualStyleBackColor = true;
+            this.editorCheck.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // midiStatus
             // 
             this.midiStatus.AutoSize = true;
@@ -347,22 +357,11 @@ namespace FuralityGridNode
             this.midiDevice.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.midiDevice.FormattingEnabled = true;
             this.midiDevice.Location = new System.Drawing.Point(5, 20);
-            this.midiDevice.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.midiDevice.Margin = new System.Windows.Forms.Padding(2);
             this.midiDevice.Name = "midiDevice";
             this.midiDevice.Size = new System.Drawing.Size(156, 21);
             this.midiDevice.TabIndex = 0;
             this.midiDevice.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
-            // 
-            // editorCheck
-            // 
-            this.editorCheck.AutoSize = true;
-            this.editorCheck.Location = new System.Drawing.Point(6, 51);
-            this.editorCheck.Name = "editorCheck";
-            this.editorCheck.Size = new System.Drawing.Size(65, 17);
-            this.editorCheck.TabIndex = 12;
-            this.editorCheck.Text = "In Editor";
-            this.editorCheck.UseVisualStyleBackColor = true;
-            this.editorCheck.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
             // Form1
             // 

@@ -562,6 +562,12 @@ namespace FuralityGridNode
             //if (output.Length != bladeSizeX * bladeSizeY * 4 * outputScale * outputScale)
                 output = new byte[bladeSizeX * bladeSizeY * 4 * outputScale * outputScale];
 
+            string spoutStatus = $"Spout Output - {bladeSizeX * outputScale}x{bladeSizeY * outputScale}";
+            if (spoutStatus != gridPreview.Text)
+            {
+                gridPreview.Text = spoutStatus;
+            }
+
             ScaleImage(rawData, bladeSizeX, bladeSizeY, outputScale, output);
 
             debug += "scale output: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
@@ -621,7 +627,9 @@ namespace FuralityGridNode
                 slow.ForeColor = Color.Red;
             else
                 slow.ForeColor = Color.Black;
-            slow.Text = debug;
+            //slow.Text = debug;
+
+            
         }
         bool framerate = false;
 
@@ -861,13 +869,13 @@ namespace FuralityGridNode
                 if (layout.coords[i].uvX < 0 || layout.coords[i].uvX > 1 || layout.coords[i].uvY < 0 || layout.coords[i].uvY > 1)
                 {
                     MessageBox.Show("Layout file had data outside of the screen and will not load.", "Layout file error.");
-                    layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
+                    //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
                     return;
                 }
                 layoutMapping.Add(i, ((layout.coords[i].dmxX), (layout.coords[i].dmxY)));
             }
 
-            layoutStatus.Text = $"{Path.GetFileNameWithoutExtension(f.FileName)}\nsize: {layout.resolutionX}x{layout.resolutionY}\nchannels: {layout.channelCount}";
+            //layoutStatus.Text = $"{Path.GetFileNameWithoutExtension(f.FileName)}\nsize: {layout.resolutionX}x{layout.resolutionY}\nchannels: {layout.channelCount}";
             customLayout = true;
         }
 
@@ -876,7 +884,7 @@ namespace FuralityGridNode
             customLayout = false;
             bladeSizeX = 1920;
             bladeSizeY = 208;
-            layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
+            //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 
         float testAnimationTime = 0;
@@ -1087,6 +1095,11 @@ namespace FuralityGridNode
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             midiReset();
+        }
+
+        private void layoutStatus_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
