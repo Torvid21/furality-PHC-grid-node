@@ -1,0 +1,14 @@
+artnet sender protocol
+
+UDP
+
+struct {
+	byte version,
+	string[64] hostname,
+	string[64] key,
+	long packetId,
+	byte[512*8] dmxData,
+	crc????
+}
+
+
