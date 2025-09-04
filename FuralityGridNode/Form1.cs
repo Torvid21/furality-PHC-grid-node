@@ -26,6 +26,7 @@ namespace FuralityGridNode
         private ArtNet artnetClient;
 
         private byte[] midiData = new byte[512 * ArtNet.maxUniverses];
+        List<byte[]> overlayData = new List<byte[]>();
         private int midiScanPosition = 0;
         private int midiCatchup = 0;
         private long midiUpdate = 0;
