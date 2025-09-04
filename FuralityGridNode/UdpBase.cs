@@ -34,7 +34,31 @@ namespace FGridUdp
             };
         }
 
-        public struct FGridPacket
+        public struct FGridPingPacket
+        {
+            public byte version;
+            public ulong timestamp;
+        }
+
+        public byte[] serializePing(FGridPingPacket input)
+        {
+            byte[] output = new byte[1 + 8];
+            byte[] timestamp = BitConverter.GetBytes(input.timestamp);
+            output[0] = input.version;
+            Array.Copy(timestamp, 0, output, 1, 8);
+            return output;
+        }
+
+        public FGridPingPacket deserializePing(byte[] input)
+        {
+            FGridPingPacket output = new FGridPingPacket();
+
+            output.version = input[0];
+            output.timestamp = BitConverter.ToUInt64(input, 1);
+            return output;
+        }
+
+        public struct FGridDMXPacket
         {
             public byte version;
             public string hostname; //16
@@ -45,7 +69,7 @@ namespace FGridUdp
             public byte[] dmxData; //512
         }
 
-        public byte[] serialize(FGridPacket input)
+        public byte[] serializeDMX(FGridDMXPacket input)
         {
             byte[] output = new byte[1 + 16 + 16 + 8 + 8 + 1 + 512];
             byte[] hostname = Encoding.ASCII.GetBytes(input.hostname);
@@ -64,9 +88,9 @@ namespace FGridUdp
             return output;
         }
 
-        public FGridPacket deserialize(byte[] input)
+        public FGridDMXPacket deserializeDMX(byte[] input)
         {
-            var output = new FGridPacket();
+            FGridDMXPacket output = new FGridDMXPacket();
 
             output.version = input[0];
             output.hostname = input.Skip(1).Take(16).ToArray().ToString();
@@ -122,53 +146,56 @@ namespace FGridUdp
         }
 
     }
+
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //create a new server
+            var server = new UdpListener();
+
+            //start listening for messages and copy the messages back to the client
+            Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    var received = await server.Receive();
+                    server.Reply("copy " + received.Message, received.Sender);
+                    if (received.Message == "quit")
+                        break;
+                }
+            });
+
+            //create a new client
+            var client = UdpUser.ConnectTo("127.0.0.1", 32123);
+
+            //wait for reply messages from server and send them to console 
+            Task.Factory.StartNew(async () =>
+            {
+                while (true)
+                {
+                    try
+                    {
+                        var received = await client.Receive();
+                        Console.WriteLine(received.Message);
+                        if (received.Message.Contains("quit"))
+                            break;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Write(ex);
+                    }
+                }
+            });
+
+            //type ahead :-)
+            string read;
+            do
+            {
+                read = Console.ReadLine();
+                client.Send(read);
+            } while (read != "quit");
+        }
+    }
 }
-
-//class Program
-//{
-//    static void Main(string[] args)
-//    {
-//        //create a new server
-//        var server = new UdpListener();
-
-//        //start listening for messages and copy the messages back to the client
-//        Task.Factory.StartNew(async () => {
-//            while (true)
-//            {
-//                var received = await server.Receive();
-//                server.Reply("copy " + received.Message, received.Sender);
-//                if (received.Message == "quit")
-//                    break;
-//            }
-//        });
-
-//        //create a new client
-//        var client = UdpUser.ConnectTo("127.0.0.1", 32123);
-
-//        //wait for reply messages from server and send them to console 
-//        Task.Factory.StartNew(async () => {
-//            while (true)
-//            {
-//                try
-//                {
-//                    var received = await client.Receive();
-//                    Console.WriteLine(received.Message);
-//                    if (received.Message.Contains("quit"))
-//                        break;
-//                }
-//                catch (Exception ex)
-//                {
-//                    Debug.Write(ex);
-//                }
-//            }
-//        });
-
-//        //type ahead :-)
-//        string read;
-//        do
-//        {
-//            read = Console.ReadLine();
-//            client.Send(read);
-//        } while (read != "quit");
-//    }
-//}
