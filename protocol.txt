@@ -6,8 +6,9 @@ struct {
 	byte version,
 	string[64] hostname,
 	string[64] key,
-	long packetId,
-	byte[512*8] dmxData,
+	lomg packetId,
+	byte universe,
+	byte[512] dmxData,
 	crc????
 }
 

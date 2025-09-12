@@ -61,6 +61,7 @@ namespace FuralityGridNode
             this.midiStatus = new System.Windows.Forms.Label();
             this.midiConnect = new System.Windows.Forms.Button();
             this.midiDevice = new System.Windows.Forms.ComboBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -363,12 +364,23 @@ namespace FuralityGridNode
             this.midiDevice.TabIndex = 0;
             this.midiDevice.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(608, 191);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(113, 23);
+            this.button1.TabIndex = 19;
+            this.button1.Text = "Save Screenshot";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_2);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(992, 224);
             this.ContextMenuStrip = this.contextMenuStrip1;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.testAnimation);
             this.Controls.Add(this.gridPreview);
@@ -426,6 +438,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label midiStatus;
         private System.Windows.Forms.Button midiConnect;
         private System.Windows.Forms.CheckBox editorCheck;
+        private System.Windows.Forms.Button button1;
     }
 }
 

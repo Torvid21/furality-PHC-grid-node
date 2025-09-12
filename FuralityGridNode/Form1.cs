@@ -1,10 +1,12 @@
-﻿using Melanchall.DryWetMidi.Common;
+﻿using FGridUdp;
+using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -13,7 +15,6 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using FGridUdp;
 
 namespace FuralityGridNode
 {
@@ -22,6 +23,7 @@ namespace FuralityGridNode
         static int bladeSizeX = 120;
         static int bladeSizeY = 13;
         static int outputScale = 16;
+        static int previewScale = 4;
 
         static bool customLayout;
         private ArtNet artnetClient;
@@ -37,6 +39,8 @@ namespace FuralityGridNode
         private FileStream logStream;
 
         private OutputDevice midiOutput;
+
+        private Bitmap outputImage;
 
         [Serializable]
         class FuralityGridNodeSettings
@@ -325,7 +329,7 @@ namespace FuralityGridNode
             bladeSizeX = 120;
             bladeSizeY = 13;
             outputScale = 16;
-            int previewScale = 4;
+            
 
             string selectedItem = rigTypeDropdown.SelectedItem as string;
 
@@ -1102,6 +1106,40 @@ namespace FuralityGridNode
         private void layoutStatus_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void button1_Click_2(object sender, EventArgs e)
+        {
+            int previewSizeX = (bladeSizeX * previewScale);
+            int previewSizeY = (bladeSizeY * previewScale);
+
+            int outputSizeX = bladeSizeX * outputScale;
+            int outputSizeY = bladeSizeY * outputScale;
+
+            Bitmap image = new Bitmap(outputSizeX, outputSizeY, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            GCHandle pinnedArray = GCHandle.Alloc(preview, GCHandleType.Pinned);
+            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+            Graphics gr = Graphics.FromImage(image);
+            IntPtr hdc = gr.GetHdc();
+            BITMAPINFO bmi = new BITMAPINFO();
+            bmi.bmiHeader = new BITMAPINFOHEADER
+            {
+                biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
+                biWidth = previewSizeX,
+                biHeight = -previewSizeY, // Negative height to indicate a top-down DIB
+                biPlanes = 1,
+                biBitCount = 32,
+                biCompression = 0, // BI_RGB
+                biSizeImage = (uint)(previewSizeX * previewSizeY) // pixel count
+            };
+            StretchDIBits(hdc, 0, 0, outputSizeX, outputSizeY, 0, 0, previewSizeX, previewSizeY, pointer, ref bmi, 0, 0x00CC0020);
+            gr.ReleaseHdc(hdc);
+            pinnedArray.Free();
+
+            string filename = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss fff");
+
+            image.Save($"{filename}.png", ImageFormat.Png);
         }
     }
 }
