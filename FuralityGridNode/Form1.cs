@@ -34,6 +34,7 @@ namespace FuralityGridNode
         private int midiCatchup = 0;
         private long midiUpdate = 0;
         private string midiSavedDevice = "";
+        private int maxMidiChannels = 4096;
         private int bankStatus = 0;
 
         private FileStream logStream;
@@ -500,7 +501,7 @@ namespace FuralityGridNode
                     int midiUpdates = 0;
                     for (int i = midiCatchup; i < combinedData.Length; i++)
                     {
-                        if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + 10)) && i < 2048) //todo: allow higher than 4 universes :3
+                        if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + 10)) && i < maxMidiChannels)
                         {
                             midiUpdates++;
                             if (midiUpdates >= 100)
@@ -510,9 +511,18 @@ namespace FuralityGridNode
                             }
                             midiData[i] = combinedData[i];
 
-                            if (i < 1024)
+                            int bank = i / 2048;
+
+                            if (bank != bankStatus)
                             {
-                                int t = i;
+                                ChangeBanks(bank);
+                                midiUpdates++;
+                            }
+
+                            int t = i - (bank * 2048);
+
+                            if (t < 1024)
+                            {
                                 NoteOnEvent noteOn = new NoteOnEvent();
                                 noteOn.Channel = (FourBitNumber)((t >> 6) & 0xF);
                                 noteOn.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
@@ -520,7 +530,7 @@ namespace FuralityGridNode
                                 midiOutput.SendEvent(noteOn);
                             }
                             else {
-                                int t = i - 1024;
+                                t = t - 1024;
                                 NoteOffEvent noteOff = new NoteOffEvent();
                                 noteOff.Channel = (FourBitNumber)((t >> 6) & 0xF);
                                 noteOff.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
@@ -539,7 +549,7 @@ namespace FuralityGridNode
                     midiStatus.ForeColor = Color.Black;
 
                     midiScanPosition += 10;
-                    if (midiScanPosition > 2048)
+                    if (midiScanPosition > maxMidiChannels)
                     {
                         midiScanPosition = 0;
                     }
