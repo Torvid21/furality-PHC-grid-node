@@ -68,17 +68,17 @@ namespace FuralityGridNode
             this.label6 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.testingClearAll = new System.Windows.Forms.Button();
-            this.testingValue = new System.Windows.Forms.NumericUpDown();
             this.testingChannel = new System.Windows.Forms.NumericUpDown();
             this.testingUniverse = new System.Windows.Forms.NumericUpDown();
+            this.testingValue = new System.Windows.Forms.NumericUpDown();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.testingValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.testingChannel)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.testingUniverse)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.testingValue)).BeginInit();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -389,7 +389,7 @@ namespace FuralityGridNode
             // 
             // testingSet
             // 
-            this.testingSet.Location = new System.Drawing.Point(6, 95);
+            this.testingSet.Location = new System.Drawing.Point(6, 122);
             this.testingSet.Name = "testingSet";
             this.testingSet.Size = new System.Drawing.Size(53, 23);
             this.testingSet.TabIndex = 20;
@@ -444,30 +444,13 @@ namespace FuralityGridNode
             // 
             // testingClearAll
             // 
-            this.testingClearAll.Location = new System.Drawing.Point(65, 95);
+            this.testingClearAll.Location = new System.Drawing.Point(65, 122);
             this.testingClearAll.Name = "testingClearAll";
             this.testingClearAll.Size = new System.Drawing.Size(63, 23);
             this.testingClearAll.TabIndex = 25;
             this.testingClearAll.Text = "Clear All";
             this.testingClearAll.UseVisualStyleBackColor = true;
             this.testingClearAll.Click += new System.EventHandler(this.testingClearAll_Click);
-            // 
-            // testingValue
-            // 
-            this.testingValue.Location = new System.Drawing.Point(9, 69);
-            this.testingValue.Maximum = new decimal(new int[] {
-            255,
-            0,
-            0,
-            0});
-            this.testingValue.Name = "testingValue";
-            this.testingValue.Size = new System.Drawing.Size(50, 20);
-            this.testingValue.TabIndex = 24;
-            this.testingValue.Value = new decimal(new int[] {
-            128,
-            0,
-            0,
-            0});
             // 
             // testingChannel
             // 
@@ -489,9 +472,36 @@ namespace FuralityGridNode
             // testingUniverse
             // 
             this.testingUniverse.Location = new System.Drawing.Point(9, 19);
+            this.testingUniverse.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.testingUniverse.Name = "testingUniverse";
             this.testingUniverse.Size = new System.Drawing.Size(50, 20);
             this.testingUniverse.TabIndex = 0;
+            this.testingUniverse.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // testingValue
+            // 
+            this.testingValue.Location = new System.Drawing.Point(9, 69);
+            this.testingValue.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.testingValue.Name = "testingValue";
+            this.testingValue.Size = new System.Drawing.Size(50, 20);
+            this.testingValue.TabIndex = 24;
+            this.testingValue.Value = new decimal(new int[] {
+            128,
+            0,
+            0,
+            0});
             // 
             // Form1
             // 
@@ -524,9 +534,9 @@ namespace FuralityGridNode
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.testingValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.testingChannel)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.testingUniverse)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.testingValue)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -568,10 +578,10 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button testingSet;
         private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.NumericUpDown testingValue;
         private System.Windows.Forms.NumericUpDown testingChannel;
         private System.Windows.Forms.NumericUpDown testingUniverse;
         private System.Windows.Forms.Button testingClearAll;
+        private System.Windows.Forms.NumericUpDown testingValue;
     }
 }
 

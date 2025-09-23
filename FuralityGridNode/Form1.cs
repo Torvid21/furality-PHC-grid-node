@@ -1160,7 +1160,9 @@ namespace FuralityGridNode
 
             value = Math.Min(Math.Max(value, 0), 255);
             channel = Math.Min(Math.Max(channel, 0), 511);
-            artnetClient.combinedData[universe * 512 + channel] = (byte)value;
+            universe = Math.Min(Math.Max(universe, 1), 100);
+
+            artnetClient.combinedData[(universe-1) * 512 + channel] = (byte)value;
         }
 
         private void testingClearAll_Click(object sender, EventArgs e)
