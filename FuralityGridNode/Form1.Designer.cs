@@ -55,17 +55,30 @@ namespace FuralityGridNode
             this.unicast = new System.Windows.Forms.CheckBox();
             this.connect = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.testAnimation = new System.Windows.Forms.Button();
+            this.testingPlayAnimation = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.editorCheck = new System.Windows.Forms.CheckBox();
             this.midiStatus = new System.Windows.Forms.Label();
             this.midiConnect = new System.Windows.Forms.Button();
             this.midiDevice = new System.Windows.Forms.ComboBox();
             this.button1 = new System.Windows.Forms.Button();
+            this.testingSet = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.testingClearAll = new System.Windows.Forms.Button();
+            this.testingValue = new System.Windows.Forms.NumericUpDown();
+            this.testingChannel = new System.Windows.Forms.NumericUpDown();
+            this.testingUniverse = new System.Windows.Forms.NumericUpDown();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.testingValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.testingChannel)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.testingUniverse)).BeginInit();
             this.SuspendLayout();
             // 
             // contextMenuStrip1
@@ -298,15 +311,15 @@ namespace FuralityGridNode
             this.timer1.Interval = 1;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // testAnimation
+            // testingPlayAnimation
             // 
-            this.testAnimation.Location = new System.Drawing.Point(480, 191);
-            this.testAnimation.Name = "testAnimation";
-            this.testAnimation.Size = new System.Drawing.Size(122, 23);
-            this.testAnimation.TabIndex = 15;
-            this.testAnimation.Text = "Play Test Animation";
-            this.testAnimation.UseVisualStyleBackColor = true;
-            this.testAnimation.Click += new System.EventHandler(this.testAnimation_Click);
+            this.testingPlayAnimation.Location = new System.Drawing.Point(6, 151);
+            this.testingPlayAnimation.Name = "testingPlayAnimation";
+            this.testingPlayAnimation.Size = new System.Drawing.Size(122, 23);
+            this.testingPlayAnimation.TabIndex = 15;
+            this.testingPlayAnimation.Text = "Play Test Animation";
+            this.testingPlayAnimation.UseVisualStyleBackColor = true;
+            this.testingPlayAnimation.Click += new System.EventHandler(this.testAnimation_Click);
             // 
             // groupBox3
             // 
@@ -366,7 +379,7 @@ namespace FuralityGridNode
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(608, 191);
+            this.button1.Location = new System.Drawing.Point(480, 192);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(113, 23);
             this.button1.TabIndex = 19;
@@ -374,18 +387,124 @@ namespace FuralityGridNode
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click_2);
             // 
+            // testingSet
+            // 
+            this.testingSet.Location = new System.Drawing.Point(6, 95);
+            this.testingSet.Name = "testingSet";
+            this.testingSet.Size = new System.Drawing.Size(53, 23);
+            this.testingSet.TabIndex = 20;
+            this.testingSet.Text = "Set";
+            this.testingSet.UseVisualStyleBackColor = true;
+            this.testingSet.Click += new System.EventHandler(this.testingSet_Click);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(62, 21);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(49, 13);
+            this.label4.TabIndex = 13;
+            this.label4.Text = "Universe";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(62, 47);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(46, 13);
+            this.label5.TabIndex = 21;
+            this.label5.Text = "Channel";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(62, 73);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(34, 13);
+            this.label6.TabIndex = 22;
+            this.label6.Text = "Value";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.testingClearAll);
+            this.groupBox4.Controls.Add(this.testingValue);
+            this.groupBox4.Controls.Add(this.testingChannel);
+            this.groupBox4.Controls.Add(this.testingUniverse);
+            this.groupBox4.Controls.Add(this.label6);
+            this.groupBox4.Controls.Add(this.testingPlayAnimation);
+            this.groupBox4.Controls.Add(this.label5);
+            this.groupBox4.Controls.Add(this.testingSet);
+            this.groupBox4.Controls.Add(this.label4);
+            this.groupBox4.Location = new System.Drawing.Point(985, 7);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(139, 180);
+            this.groupBox4.TabIndex = 18;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Testing";
+            // 
+            // testingClearAll
+            // 
+            this.testingClearAll.Location = new System.Drawing.Point(65, 95);
+            this.testingClearAll.Name = "testingClearAll";
+            this.testingClearAll.Size = new System.Drawing.Size(63, 23);
+            this.testingClearAll.TabIndex = 25;
+            this.testingClearAll.Text = "Clear All";
+            this.testingClearAll.UseVisualStyleBackColor = true;
+            this.testingClearAll.Click += new System.EventHandler(this.testingClearAll_Click);
+            // 
+            // testingValue
+            // 
+            this.testingValue.Location = new System.Drawing.Point(9, 69);
+            this.testingValue.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
+            this.testingValue.Name = "testingValue";
+            this.testingValue.Size = new System.Drawing.Size(50, 20);
+            this.testingValue.TabIndex = 24;
+            this.testingValue.Value = new decimal(new int[] {
+            128,
+            0,
+            0,
+            0});
+            // 
+            // testingChannel
+            // 
+            this.testingChannel.Location = new System.Drawing.Point(9, 45);
+            this.testingChannel.Maximum = new decimal(new int[] {
+            512,
+            0,
+            0,
+            0});
+            this.testingChannel.Name = "testingChannel";
+            this.testingChannel.Size = new System.Drawing.Size(50, 20);
+            this.testingChannel.TabIndex = 23;
+            this.testingChannel.Value = new decimal(new int[] {
+            25,
+            0,
+            0,
+            0});
+            // 
+            // testingUniverse
+            // 
+            this.testingUniverse.Location = new System.Drawing.Point(9, 19);
+            this.testingUniverse.Name = "testingUniverse";
+            this.testingUniverse.Size = new System.Drawing.Size(50, 20);
+            this.testingUniverse.TabIndex = 0;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(992, 224);
+            this.ClientSize = new System.Drawing.Size(1137, 224);
             this.ContextMenuStrip = this.contextMenuStrip1;
             this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox3);
-            this.Controls.Add(this.testAnimation);
             this.Controls.Add(this.gridPreview);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.groupBox4);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -403,6 +522,11 @@ namespace FuralityGridNode
             this.groupBox1.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.testingValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.testingChannel)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.testingUniverse)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -429,7 +553,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.Label layoutStatus;
         private System.Windows.Forms.GroupBox gridPreview;
-        private System.Windows.Forms.Button testAnimation;
+        private System.Windows.Forms.Button testingPlayAnimation;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.CheckBox largeCRC;
         private System.Windows.Forms.CheckBox turboExpand;
@@ -439,6 +563,15 @@ namespace FuralityGridNode
         private System.Windows.Forms.Button midiConnect;
         private System.Windows.Forms.CheckBox editorCheck;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button testingSet;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.NumericUpDown testingValue;
+        private System.Windows.Forms.NumericUpDown testingChannel;
+        private System.Windows.Forms.NumericUpDown testingUniverse;
+        private System.Windows.Forms.Button testingClearAll;
     }
 }
 

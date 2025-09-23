@@ -893,11 +893,6 @@ namespace FuralityGridNode
             //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 
-        float testAnimationTime = 0;
-        private void testAnimation_Click(object sender, EventArgs e)
-        {
-            testAnimationTime = 1.0f;
-        }
 
         private void groupBox3_Enter(object sender, EventArgs e)
         {
@@ -1140,6 +1135,37 @@ namespace FuralityGridNode
             string filename = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss fff");
 
             image.Save($"{filename}.png", ImageFormat.Png);
+        }
+
+
+        float testAnimationTime = 0;
+        private void testAnimation_Click(object sender, EventArgs e)
+        {
+            // clear all overwrites when test animation plays
+            testAnimationTime = 1.0f;
+        }
+
+        // for now we assume the users doesn't put very many overwrites.
+        private void testingSet_Click(object sender, EventArgs e)
+        {
+            int universe;
+            int channel;
+            int value;
+            if (!int.TryParse(testingUniverse.Text, out universe))
+                return;
+            if (!int.TryParse(testingChannel.Text, out channel))
+                return;
+            if (!int.TryParse(testingValue.Text, out value))
+                return;
+
+            value = Math.Min(Math.Max(value, 0), 255);
+            channel = Math.Min(Math.Max(channel, 0), 511);
+            artnetClient.combinedData[universe * 512 + channel] = (byte)value;
+        }
+
+        private void testingClearAll_Click(object sender, EventArgs e)
+        {
+            Array.Clear(artnetClient.combinedData, 0, artnetClient.combinedData.Length);
         }
     }
 }
