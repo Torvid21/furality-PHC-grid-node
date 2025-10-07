@@ -150,6 +150,15 @@ namespace FuralityGridNode
                 Trace.WriteLine("ArtNetClient: Closing Listener");
             }
 
+            if (listenAddress == null) // invalid address
+            {
+                if (listener != null)
+                    listener.Close();
+
+                Trace.WriteLine("ArtNetClient: Invalid IP Address");
+                return;
+            }
+
             IPEndPoint remoteEndPoint = new IPEndPoint(listenAddress, listenPort);
 
             try

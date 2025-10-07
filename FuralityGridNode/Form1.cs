@@ -995,16 +995,19 @@ namespace FuralityGridNode
             }
 
             string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            string[] logs = Directory.GetFiles(path + "\\..\\LocalLow\\VRChat\\VRChat", "output_log_*.txt", SearchOption.TopDirectoryOnly);
-            if (logs.Length == 0) return;
 
-            Array.Sort(logs);
-            string log = logs[logs.Length - 1];
-
-            //Editor!!
+            string log = "";
             if (editorCheck.Checked)
             {
                 log = path + "\\..\\Local\\Unity\\Editor\\Editor.log";
+            }
+            else
+            {
+                string[] logs = Directory.GetFiles(path + "\\..\\LocalLow\\VRChat\\VRChat", "output_log_*.txt", SearchOption.TopDirectoryOnly);
+                if (logs.Length == 0) return;
+
+                Array.Sort(logs);
+                log = logs[logs.Length - 1];
             }
 
             logStream = new FileStream(log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -1156,24 +1159,24 @@ namespace FuralityGridNode
         }
 
         // for now we assume the users doesn't put very many overwrites.
-        private void testingSet_Click(object sender, EventArgs e)
-        {
-            int universe;
-            int channel;
-            int value;
-            if (!int.TryParse(testingUniverse.Text, out universe))
-                return;
-            if (!int.TryParse(testingChannel.Text, out channel))
-                return;
-            if (!int.TryParse(testingValue.Text, out value))
-                return;
-
-            value = Math.Min(Math.Max(value, 0), 255);
-            channel = Math.Min(Math.Max(channel, 0), 511);
-            universe = Math.Min(Math.Max(universe, 1), 100);
-
-            artnetClient.combinedData[(universe-1) * 512 + channel] = (byte)value;
-        }
+        //private void testingSet_Click(object sender, EventArgs e)
+        //{
+        //    int universe;
+        //    int channel;
+        //    int value;
+        //    if (!int.TryParse(testingUniverse.Text, out universe))
+        //        return;
+        //    if (!int.TryParse(testingChannel.Text, out channel))
+        //        return;
+        //    if (!int.TryParse(testingValue.Text, out value))
+        //        return;
+        //
+        //    value = Math.Min(Math.Max(value, 0), 255);
+        //    channel = Math.Min(Math.Max(channel, 0), 511);
+        //    universe = Math.Min(Math.Max(universe, 1), 100);
+        //
+        //    artnetClient.combinedData[(universe-1) * 512 + channel] = (byte)value;
+        //}
 
         private void testingClearAll_Click(object sender, EventArgs e)
         {
