@@ -20,7 +20,9 @@ torvid pls update this I'm cluelessly sleepy rn
 
 also here, be sure to reference libraries used in the project. Go through the project pls
 
+wetdrymidi, mit
 
+spout2, mit-2-clause
 
    Copyright 2025 Furality, Inc
 
