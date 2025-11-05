@@ -19,8 +19,11 @@ This project is pre-configured for [Visual Studio 2022 CE](https://visualstudio.
 ## Licenses
 
 MIT software included for completeness
+
 [WetDryMidi](https://github.com/melanchall/drywetmidi), MIT
+
 [Fody](https://github.com/Fody/Fody) [Costura.Fody](https://github.com/Fody/Costura), MIT
+
 [MIDIDMX](https://github.com/micksam7/VRC-MIDIDMX), MIT
 
 [Spout2](https://github.com/leadedge/Spout2) (SpoutLibrary.dll), BSD 2-Clause
