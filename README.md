@@ -18,13 +18,15 @@ This project is pre-configured for [Visual Studio 2022 CE](https://visualstudio.
 
 MIT software included for completeness
 
-[WetDryMidi](https://github.com/melanchall/drywetmidi), MIT
+[WetDryMidi](https://github.com/melanchall/drywetmidi), MIT, Copyright (c) 2018 Maxim Dobroselsky
 
-[Fody](https://github.com/Fody/Fody) [Costura.Fody](https://github.com/Fody/Costura), MIT
+[Fody](https://github.com/Fody/Fody) MIT, Copyright (c) The Fody Team and contributors
 
-[MIDIDMX](https://github.com/micksam7/VRC-MIDIDMX), MIT
+[Costura.Fody](https://github.com/Fody/Costura), MIT, Copyright (c) 2012 Simon Cropp and contributors
 
-[Spout2](https://github.com/leadedge/Spout2) (SpoutLibrary.dll), BSD 2-Clause
+[MIDIDMX](https://github.com/micksam7/VRC-MIDIDMX), MIT, Copyright (c) 2025 Micca
+
+[Spout2](https://github.com/leadedge/Spout2) (SpoutLibrary.dll), BSD 2-Clause, Copyright (c) 2020-2024, Lynn Jarvis
     
    Copyright 2025 Furality, Inc
 
