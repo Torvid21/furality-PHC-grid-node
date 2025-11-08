@@ -14,7 +14,7 @@ Compatible ArtNet lighting software or network hardware is required.
 
 This project is pre-configured for [Visual Studio 2022 CE](https://visualstudio.microsoft.com/vs/), but should build fine on any recent version.
 
-## Licenses
+## Licenses & Attributiion
 
 MIT software included for completeness
 
