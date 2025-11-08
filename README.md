@@ -2,7 +2,7 @@
 
 A gridnode generator for sending DMX control over video. Used in Furality worlds and other projects.
 
-This program will change violently as-needed by furality and other projects, if you are looking for something more stable check out [hnode](https://github.com/Happyrobot33/HNode).
+This program is meant to be a minimal gridnode with features and formats only added as-needed. If you are looking for something more modular, check out [hnode](https://github.com/Happyrobot33/HNode).
 
 Exports video via [Spout2](https://github.com/leadedge/Spout2).
 
