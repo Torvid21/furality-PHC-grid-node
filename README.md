@@ -14,20 +14,7 @@ Compatible ArtNet lighting software or network hardware is required.
 
 This project is pre-configured for [Visual Studio 2022 CE](https://visualstudio.microsoft.com/vs/), but should build fine on any recent version.
 
-## Licenses & Attributiion
-
-MIT-liscence software included for completeness
-
-[WetDryMidi](https://github.com/melanchall/drywetmidi), MIT, Copyright (c) 2018 Maxim Dobroselsky
-
-[Fody](https://github.com/Fody/Fody) MIT, Copyright (c) The Fody Team and contributors
-
-[Costura.Fody](https://github.com/Fody/Costura), MIT, Copyright (c) 2012 Simon Cropp and contributors
-
-[MIDIDMX](https://github.com/micksam7/VRC-MIDIDMX), MIT, Copyright (c) 2025 Micca
-
-[Spout2](https://github.com/leadedge/Spout2) (SpoutLibrary.dll), BSD 2-Clause, Copyright (c) 2020-2024, Lynn Jarvis
-    
+## License
    Copyright 2025 Furality, Inc
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,3 +28,17 @@ MIT-liscence software included for completeness
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+## Attribution
+
+[Spout2](https://github.com/leadedge/Spout2) (SpoutLibrary.dll), BSD 2-Clause, Copyright (c) 2020-2024, Lynn Jarvis
+
+MIT-liscence software included for completeness
+
+[WetDryMidi](https://github.com/melanchall/drywetmidi), MIT, Copyright (c) 2018 Maxim Dobroselsky
+
+[Fody](https://github.com/Fody/Fody) MIT, Copyright (c) The Fody Team and contributors
+
+[Costura.Fody](https://github.com/Fody/Costura), MIT, Copyright (c) 2012 Simon Cropp and contributors
+
+[MIDIDMX](https://github.com/micksam7/VRC-MIDIDMX), MIT, Copyright (c) 2025 Micca
