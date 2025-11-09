@@ -16,7 +16,7 @@ This project is pre-configured for [Visual Studio 2022 CE](https://visualstudio.
 
 ## Licenses & Attributiion
 
-MIT software included for completeness
+MIT-liscence software included for completeness
 
 [WetDryMidi](https://github.com/melanchall/drywetmidi), MIT, Copyright (c) 2018 Maxim Dobroselsky
 
