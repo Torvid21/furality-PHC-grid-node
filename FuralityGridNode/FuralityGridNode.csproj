@@ -101,7 +101,17 @@
     <Compile Remove="obj\x64\Debug\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="costura-win-x64\Melanchall_DryWetMidi_Native64.dll" />
+    <None Remove="costura-win-x64\SpoutLibrary.dll" />
+    <None Remove="costura-win-x86\Melanchall_DryWetMidi_Native32.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="FynnGridNode.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="costura-win-x64\Melanchall_DryWetMidi_Native64.dll" />
+    <EmbeddedResource Include="costura-win-x64\SpoutLibrary.dll" />
+    <EmbeddedResource Include="costura-win-x86\Melanchall_DryWetMidi_Native32.dll" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Costura.Fody" Version="6.0.0">

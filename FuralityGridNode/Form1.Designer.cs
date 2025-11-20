@@ -66,6 +66,7 @@ namespace FuralityGridNode
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -323,7 +324,7 @@ namespace FuralityGridNode
             this.groupBox3.Controls.Add(this.midiDevice);
             this.groupBox3.Location = new System.Drawing.Point(6, 139);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(226, 76);
+            this.groupBox3.Size = new System.Drawing.Size(226, 71);
             this.groupBox3.TabIndex = 18;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "MIDIDMX";
@@ -399,6 +400,7 @@ namespace FuralityGridNode
             this.tabPage1.Controls.Add(this.button1);
             this.tabPage1.Controls.Add(this.testingPlayAnimation);
             this.tabPage1.Controls.Add(this.groupBox3);
+            this.tabPage1.Controls.Add(this.label5);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -426,6 +428,15 @@ namespace FuralityGridNode
             this.label4.TabIndex = 15;
             this.label4.Text = "creature!!";
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 213);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(50, 13);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "version 2";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -452,6 +463,7 @@ namespace FuralityGridNode
             this.groupBox3.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
@@ -494,6 +506,7 @@ namespace FuralityGridNode
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
     }
 }
 
