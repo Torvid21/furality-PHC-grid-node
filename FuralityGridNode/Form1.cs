@@ -171,6 +171,10 @@ namespace FuralityGridNode
         static string statusText = "";
         static string statusTextLast = "";
 
+        public static bool IsValidIndex<T>(IList<T> source, int index)
+        {
+            return source != null && index >= 0 && index < source.Count;
+        }
 
         // CRC-8 (x⁸ + x² + x + 1)
         public static byte Crc8For6(
@@ -375,30 +379,30 @@ namespace FuralityGridNode
                     }
                 }
             }
-            else if (selectedItem == "Packed")
-            {
-                //if (rawData.Length != bladeSizeX * bladeSizeY * 4)
-                    rawData = new byte[bladeSizeX * bladeSizeY * 4];
-                int countX = bladeSizeX;
-                int countY = bladeSizeY;
-                for (int channel = 0; channel < ((512 * 8) / 3); channel++)
-                {
-                    byte dataR = combinedData[channel * 3 + 0];
-                    byte dataG = combinedData[channel * 3 + 1];
-                    byte dataB = combinedData[channel * 3 + 2];
-
-                    int x = channel / countY;
-                    int y = channel % countY;
-                    if (customLayout)
-                    {
-                        if (channel >= layoutMapping.Count)
-                            continue;
-                        x = layoutMapping[channel].x;
-                        y = layoutMapping[channel].y;
-                    }
-                    SetPixel(rawData, bladeSizeX, bladeSizeY, x, y, dataR, dataG, dataB, 255);
-                }
-            }
+            //else if (selectedItem == "Packed")
+            //{
+            //    //if (rawData.Length != bladeSizeX * bladeSizeY * 4)
+            //        rawData = new byte[bladeSizeX * bladeSizeY * 4];
+            //    int countX = bladeSizeX;
+            //    int countY = bladeSizeY;
+            //    for (int channel = 0; channel < ((512 * 8) / 3); channel++)
+            //    {
+            //        byte dataR = combinedData[channel * 3 + 0];
+            //        byte dataG = combinedData[channel * 3 + 1];
+            //        byte dataB = combinedData[channel * 3 + 2];
+            //
+            //        int x = channel / countY;
+            //        int y = channel % countY;
+            //        if (customLayout)
+            //        {
+            //            if (channel >= layoutMapping.Count)
+            //                continue;
+            //            x = layoutMapping[channel].x;
+            //            y = layoutMapping[channel].y;
+            //        }
+            //        SetPixel(rawData, bladeSizeX, bladeSizeY, x, y, dataR, dataG, dataB, 255);
+            //    }
+            //}
             else if (selectedItem == "FRig")
             {
                 //if (rawData.Length != bladeSizeX * bladeSizeY * 4)
@@ -421,8 +425,10 @@ namespace FuralityGridNode
                         }
                         int pixelX = gridX;
                         int pixelY = gridY;
-                
-                        byte data = combinedData[fixture.UnityChannel - 1];
+                        byte data = 0;
+
+                        if (IsValidIndex(combinedData, fixture.UnityChannel - 1))
+                            data = combinedData[fixture.UnityChannel - 1];
                 
                         int color = fixture.GridColor;
                 

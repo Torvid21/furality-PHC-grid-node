@@ -168,7 +168,6 @@ namespace FuralityGridNode
             this.rigTypeDropdown.FormattingEnabled = true;
             this.rigTypeDropdown.Items.AddRange(new object[] {
             "VRSL",
-            "Packed",
             "FRig",
             "Binary"});
             this.rigTypeDropdown.Location = new System.Drawing.Point(10, 19);
