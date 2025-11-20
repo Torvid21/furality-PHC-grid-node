@@ -434,7 +434,7 @@ namespace FuralityGridNode
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(50, 13);
             this.label5.TabIndex = 13;
-            this.label5.Text = "version 2";
+            this.label5.Text = "version 3";
             // 
             // Form1
             // 
