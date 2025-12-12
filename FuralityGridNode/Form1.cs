@@ -1,5 +1,4 @@
-﻿using FGridUdp;
-using Melanchall.DryWetMidi.Common;
+﻿using Melanchall.DryWetMidi.Common;
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using System;
@@ -8,13 +7,10 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace FuralityGridNode
 {
@@ -22,10 +18,14 @@ namespace FuralityGridNode
     {
         static int bladeSizeX = 120;
         static int bladeSizeY = 13;
+
+        static bool customLayout;
+        static int customLayoutBladeSizeX = 120;
+        static int customLayoutBladeSizeY = 13;
+
         static int outputScale = 16;
         static int previewScale = 4;
 
-        static bool customLayout;
         private ArtNet artnetClient;
 
         private byte[] midiData = new byte[512 * ArtNet.maxUniverses];
@@ -221,7 +221,9 @@ namespace FuralityGridNode
             return (byte)crc; // put crc on the left and pad 0s
         }
 
-        void SetPixel(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, byte R, byte G, byte B, byte A)
+        void SetPixel(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, 
+            byte R, byte G, byte B, byte A, 
+            bool setR = true, bool setG = true, bool setB = true, bool setA = true)
         {
             if (X >= dataSizeX || Y >= dataSizeY)
                 return;
@@ -231,10 +233,10 @@ namespace FuralityGridNode
 
             int rowIndex = (Y * dataSizeX) * 4;
             int idx = rowIndex + X * 4;
-            data[idx + 0] = B;  // B
-            data[idx + 1] = G;  // G
-            data[idx + 2] = R;  // R
-            data[idx + 3] = A;  // A
+            if(setR) data[idx + 0] = B;  // B
+            if(setG) data[idx + 1] = G;  // G
+            if(setB) data[idx + 2] = R;  // R
+            if(setA) data[idx + 3] = A;  // A
         }
         void SetPixel(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, bool value)
         {
@@ -331,10 +333,10 @@ namespace FuralityGridNode
             long startTimestamp = checkTimestamp;
 
             string debug = "";
-            //bladeSizeX = 120;
-            //bladeSizeY = 13;
             outputScale = 16;
-            
+            previewScale = 4;
+            bladeSizeX = 120;
+            bladeSizeY = 13;
 
             string selectedItem = rigTypeDropdown.SelectedItem as string;
 
@@ -348,13 +350,23 @@ namespace FuralityGridNode
                 debug += "\n";
             debug += "setup: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
             checkTimestamp = Stopwatch.GetTimestamp();
+
             if (selectedItem == "VRSL")
             {
-                //if (rawData.Length != bladeSizeX * bladeSizeY * 4)
-                    rawData = new byte[bladeSizeX * bladeSizeY * 4];
+                if (customLayout)
+                {
+                    bladeSizeX = customLayoutBladeSizeX;
+                    bladeSizeY = customLayoutBladeSizeY;
+                }
+
+                rawData = new byte[bladeSizeX * bladeSizeY * 4];
                 int countX = bladeSizeX;
                 int countY = bladeSizeY;
-                for (int universe = 0; universe < 3; universe++)
+                int maxUniverse = 3;
+                if (customLayout)
+                    maxUniverse = 8;
+
+                for (int universe = 0; universe < maxUniverse; universe++)
                 {
                     for (int i = 0; i < 512; i++)
                     {
@@ -379,34 +391,15 @@ namespace FuralityGridNode
                     }
                 }
             }
-            //else if (selectedItem == "Packed")
-            //{
-            //    //if (rawData.Length != bladeSizeX * bladeSizeY * 4)
-            //        rawData = new byte[bladeSizeX * bladeSizeY * 4];
-            //    int countX = bladeSizeX;
-            //    int countY = bladeSizeY;
-            //    for (int channel = 0; channel < ((512 * 8) / 3); channel++)
-            //    {
-            //        byte dataR = combinedData[channel * 3 + 0];
-            //        byte dataG = combinedData[channel * 3 + 1];
-            //        byte dataB = combinedData[channel * 3 + 2];
-            //
-            //        int x = channel / countY;
-            //        int y = channel % countY;
-            //        if (customLayout)
-            //        {
-            //            if (channel >= layoutMapping.Count)
-            //                continue;
-            //            x = layoutMapping[channel].x;
-            //            y = layoutMapping[channel].y;
-            //        }
-            //        SetPixel(rawData, bladeSizeX, bladeSizeY, x, y, dataR, dataG, dataB, 255);
-            //    }
-            //}
             else if (selectedItem == "FRig")
             {
-                //if (rawData.Length != bladeSizeX * bladeSizeY * 4)
-                    rawData = new byte[bladeSizeX * bladeSizeY * 4];
+                if (customLayout)
+                {
+                    bladeSizeX = customLayoutBladeSizeX;
+                    bladeSizeY = customLayoutBladeSizeY;
+                }
+
+                rawData = new byte[bladeSizeX * bladeSizeY * 4];
                 int countX = bladeSizeX;
                 int countY = bladeSizeY;
                 if (currentRig != null && currentRig.Fixtures != null)
@@ -431,10 +424,24 @@ namespace FuralityGridNode
                             data = combinedData[fixture.UnityChannel - 1];
                 
                         int color = fixture.GridColor;
-                
-                        // TODO: Change this to SetPixel
-                        DrawColorSquare(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, 1, 1, data, fixture.GridColor, false);
-                
+
+                        if (fixture.GridColor == 0)
+                        {
+                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255, true, false, false, true);
+                        }
+                        if (fixture.GridColor == 1)
+                        {
+                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255, false, true, false, true);
+                        }
+                        if (fixture.GridColor == 2)
+                        {
+                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255, false, false, true, true);
+                        }
+                        if (fixture.GridColor == 3)
+                        {
+                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255);
+                        }
+
                         index++;
                     }
                 }
@@ -455,21 +462,12 @@ namespace FuralityGridNode
                 int turboExpandSize = 1;
                 if (turboExpand.Checked)
                     turboExpandSize = 5;
-                //if (largeCRC.Checked)
-                //{
-                //    bladeSizeX = 480;
-                //    bladeSizeY = 56;
-                //}
-                //else
-                //{
-                    bladeSizeX = 480;
-                    bladeSizeY = 52 * turboExpandSize;
-                //}
 
-                //if (rawData.Length != bladeSizeX * bladeSizeY * 4)
-                    rawData = new byte[bladeSizeX * bladeSizeY * 4];
+                bladeSizeX = 480;
+                bladeSizeY = 52 * turboExpandSize;
 
-                //rawData = new byte[bladeSizeX * bladeSizeY * 4];
+                rawData = new byte[bladeSizeX * bladeSizeY * 4];
+
                 for (int i = 0; i < combinedData.Length; i++)
                 {
                     int turboExpandOffset = i / 6 / bladeSizeX;
@@ -493,8 +491,8 @@ namespace FuralityGridNode
                         }
                     }
                 }
-                
-            } else
+            }
+            else
             {
                 return;
             }
@@ -649,45 +647,9 @@ namespace FuralityGridNode
                 slow.ForeColor = Color.Red;
             else
                 slow.ForeColor = Color.Black;
-            //slow.Text = debug;
-
-            
         }
+
         bool framerate = false;
-
-        private void DrawColorSquare(byte[] data, int dataSizeX, int dataSizeY, int X, int Y, int sizeX, int sizeY, byte dataIn, int selector, bool bgra)
-        {
-            for (int x = X; x < X + sizeX; x++)
-            {
-                for (int y = Y; y < Y + sizeY; y++)
-                {
-                    int index = (x + y * dataSizeX) * 4;
-                    switch (selector) {
-                        case 1:
-                            if (bgra)
-                                data[index + 2] = dataIn; // R
-                            else
-                                data[index] = dataIn;
-                                break;
-                        case 2:
-                            data[index + 1] = dataIn; // G
-                            break;
-                        case 3:
-                            if (bgra)
-                                data[index] = dataIn; // B
-                            else
-                                data[index + 2] = dataIn;
-                                break;
-                        default:
-                            data[index + 3] = dataIn; // A
-                            data[index + 2] = dataIn; // R
-                            data[index + 1] = dataIn; // G
-                            data[index] = dataIn; // B
-                            break;
-                    }
-                }
-            }
-        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -882,8 +844,8 @@ namespace FuralityGridNode
 
             //this.Size = new Size(layout.resolutionX, layout.resolutionY);
 
-            bladeSizeX = layout.dmxSizeX;
-            bladeSizeY = layout.dmxSizeY;
+            customLayoutBladeSizeX = layout.dmxSizeX;
+            customLayoutBladeSizeY = layout.dmxSizeY;
 
             layoutMapping = new Dictionary<int, (int x, int y)>();
             for (int i = 0; i < layout.coords.Count; i++)
@@ -899,13 +861,14 @@ namespace FuralityGridNode
 
             //layoutStatus.Text = $"{Path.GetFileNameWithoutExtension(f.FileName)}\nsize: {layout.resolutionX}x{layout.resolutionY}\nchannels: {layout.channelCount}";
             customLayout = true;
+            layoutStatus.Text = "";
         }
 
         private void UnloadLayout_Click(object sender, EventArgs e)
         {
             customLayout = false;
-            bladeSizeX = 120;
-            bladeSizeY = 13;
+            //bladeSizeX = 120;
+            //bladeSizeY = 13;
             //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 
