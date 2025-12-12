@@ -331,8 +331,8 @@ namespace FuralityGridNode
             long startTimestamp = checkTimestamp;
 
             string debug = "";
-            bladeSizeX = 120;
-            bladeSizeY = 13;
+            //bladeSizeX = 120;
+            //bladeSizeY = 13;
             outputScale = 16;
             
 
@@ -882,8 +882,8 @@ namespace FuralityGridNode
 
             //this.Size = new Size(layout.resolutionX, layout.resolutionY);
 
-            bladeSizeX = layout.dmxSizeX * 16;
-            bladeSizeY = layout.dmxSizeY * 16;
+            bladeSizeX = layout.dmxSizeX;
+            bladeSizeY = layout.dmxSizeY;
 
             layoutMapping = new Dictionary<int, (int x, int y)>();
             for (int i = 0; i < layout.coords.Count; i++)
@@ -904,8 +904,8 @@ namespace FuralityGridNode
         private void UnloadLayout_Click(object sender, EventArgs e)
         {
             customLayout = false;
-            bladeSizeX = 1920;
-            bladeSizeY = 208;
+            bladeSizeX = 120;
+            bladeSizeY = 13;
             //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 

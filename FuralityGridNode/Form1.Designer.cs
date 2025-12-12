@@ -64,9 +64,9 @@ namespace FuralityGridNode
             this.button1 = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label5 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -408,6 +408,15 @@ namespace FuralityGridNode
             this.tabPage1.Text = "Main";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 213);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(50, 13);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "version 4";
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.label4);
@@ -426,15 +435,6 @@ namespace FuralityGridNode
             this.label4.Size = new System.Drawing.Size(52, 13);
             this.label4.TabIndex = 15;
             this.label4.Text = "creature!!";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 213);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(50, 13);
-            this.label5.TabIndex = 13;
-            this.label5.Text = "version 3";
             // 
             // Form1
             // 
