@@ -463,7 +463,7 @@ namespace FuralityGridNode
                 if (turboExpand.Checked)
                     turboExpandSize = 5;
 
-                bladeSizeX = 480;
+                bladeSizeX = res1440p.Checked ? 640 : 480;
                 bladeSizeY = 52 * turboExpandSize;
 
                 rawData = new byte[bladeSizeX * bladeSizeY * 4];
@@ -503,12 +503,15 @@ namespace FuralityGridNode
                 {
                     //Midi updates
                     int midiUpdates = 0;
+                    int midiCap = bigDataCheck.Checked ? 3200 : 100;
+                    int scanCap = bigDataCheck.Checked ? 100 : 10;
+                    int maxMidiChannels = bigDataCheck.Checked ? 16384 : 4096;
                     for (int i = midiCatchup; i < combinedData.Length; i++)
                     {
-                        if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + 10)) && i < maxMidiChannels)
+                        if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + scanCap)) && i < maxMidiChannels)
                         {
                             midiUpdates++;
-                            if (midiUpdates >= 100)
+                            if (midiUpdates >= midiCap)
                             {
                                 midiCatchup = i;
                                 break;
@@ -544,7 +547,7 @@ namespace FuralityGridNode
                         }
                     }
 
-                    if (midiUpdates < 100)
+                    if (midiUpdates < midiCap)
                     {
                         midiCatchup = 0;
                     }
@@ -552,7 +555,7 @@ namespace FuralityGridNode
                     midiStatus.Text = "Connected - Sending Data";
                     midiStatus.ForeColor = Color.Black;
 
-                    midiScanPosition += 10;
+                    midiScanPosition += scanCap;
                     if (midiScanPosition > maxMidiChannels)
                     {
                         midiScanPosition = 0;
@@ -1150,6 +1153,16 @@ namespace FuralityGridNode
         private void testingClearAll_Click(object sender, EventArgs e)
         {
             Array.Clear(artnetClient.combinedData, 0, artnetClient.combinedData.Length);
+        }
+
+        private void checkBox1_CheckedChanged_2(object sender, EventArgs e)
+        {
+
+        }
+
+        private void turboExpand_CheckedChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
