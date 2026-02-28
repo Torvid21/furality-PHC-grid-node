@@ -37,6 +37,7 @@ namespace FuralityGridNode
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.gridPreview = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.res1440p = new System.Windows.Forms.CheckBox();
             this.slow = new System.Windows.Forms.Label();
             this.turboExpand = new System.Windows.Forms.CheckBox();
             this.largeCRC = new System.Windows.Forms.CheckBox();
@@ -68,7 +69,6 @@ namespace FuralityGridNode
             this.label5 = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label4 = new System.Windows.Forms.Label();
-            this.res1440p = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -132,6 +132,16 @@ namespace FuralityGridNode
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Rig";
             // 
+            // res1440p
+            // 
+            this.res1440p.AutoSize = true;
+            this.res1440p.Location = new System.Drawing.Point(196, 64);
+            this.res1440p.Name = "res1440p";
+            this.res1440p.Size = new System.Drawing.Size(80, 24);
+            this.res1440p.TabIndex = 18;
+            this.res1440p.Text = "1440p";
+            this.res1440p.UseVisualStyleBackColor = true;
+            // 
             // slow
             // 
             this.slow.AutoSize = true;
@@ -156,7 +166,7 @@ namespace FuralityGridNode
             // largeCRC
             // 
             this.largeCRC.AutoSize = true;
-            this.largeCRC.Location = new System.Drawing.Point(196, 63);
+            this.largeCRC.Location = new System.Drawing.Point(196, 96);
             this.largeCRC.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.largeCRC.Name = "largeCRC";
             this.largeCRC.Size = new System.Drawing.Size(104, 24);
@@ -367,6 +377,7 @@ namespace FuralityGridNode
             this.bigDataCheck.TabIndex = 13;
             this.bigDataCheck.Text = "Big Data [client crashes]";
             this.bigDataCheck.UseVisualStyleBackColor = true;
+            this.bigDataCheck.Visible = false;
             this.bigDataCheck.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged_2);
             // 
             // editorCheck
@@ -460,7 +471,8 @@ namespace FuralityGridNode
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(72, 20);
             this.label5.TabIndex = 13;
-            this.label5.Text = "version 4";
+            this.label5.Text = "version 5";
+            this.label5.Click += new System.EventHandler(this.label5_Click);
             // 
             // tabPage2
             // 
@@ -468,7 +480,7 @@ namespace FuralityGridNode
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(1494, 359);
+            this.tabPage2.Size = new System.Drawing.Size(1725, 359);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "creature??";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -482,16 +494,6 @@ namespace FuralityGridNode
             this.label4.Size = new System.Drawing.Size(76, 20);
             this.label4.TabIndex = 15;
             this.label4.Text = "creature!!";
-            // 
-            // res1440p
-            // 
-            this.res1440p.AutoSize = true;
-            this.res1440p.Location = new System.Drawing.Point(196, 92);
-            this.res1440p.Name = "res1440p";
-            this.res1440p.Size = new System.Drawing.Size(80, 24);
-            this.res1440p.TabIndex = 18;
-            this.res1440p.Text = "1440p";
-            this.res1440p.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
