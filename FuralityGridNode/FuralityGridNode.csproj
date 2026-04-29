@@ -61,6 +61,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackAsTool>True</PackAsTool>
     <ApplicationIcon>FynnGridNode.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Data.DataSetExtensions" />

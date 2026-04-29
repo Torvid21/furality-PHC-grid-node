@@ -2,10 +2,10 @@
 using Melanchall.DryWetMidi.Core;
 using Melanchall.DryWetMidi.Multimedia;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -16,16 +16,6 @@ namespace FuralityGridNode
 {
     public partial class Form1 : Form
     {
-        static int bladeSizeX = 120;
-        static int bladeSizeY = 13;
-
-        static bool customLayout;
-        static int customLayoutBladeSizeX = 120;
-        static int customLayoutBladeSizeY = 13;
-
-        static int outputScale = 16;
-        static int previewScale = 4;
-
         private ArtNet artnetClient;
 
         private byte[] midiData = new byte[512 * ArtNet.maxUniverses];
@@ -37,11 +27,13 @@ namespace FuralityGridNode
         private int maxMidiChannels = 4096;
         private int bankStatus = 0;
 
+        bool framerate = false;
+        SpoutWrapper spoutForLT;
+        SpoutWrapper spout;
+
         private FileStream logStream;
 
         private OutputDevice midiOutput;
-
-        private Bitmap outputImage;
 
         [Serializable]
         class FuralityGridNodeSettings
@@ -52,6 +44,7 @@ namespace FuralityGridNode
             public string RigType;
             public string MidiDevice;
             public bool Is1440pModeOn;
+            public bool TimecodeOn;
         }
 
         public void SaveSettings()
@@ -60,9 +53,10 @@ namespace FuralityGridNode
             settings.ArtNetAddress = ipInput.Text;
             settings.ArtNetPort = portInput.Text;
             settings.Unicast = unicast.Checked;
-            settings.RigType = rigTypeDropdown.SelectedItem != null ? rigTypeDropdown.SelectedItem.ToString() : "VRSL";
+            //settings.RigType = rigTypeDropdown.SelectedItem != null ? rigTypeDropdown.SelectedItem.ToString() : "Binary";
             settings.MidiDevice = midiDevice.SelectedItem != null ? midiDevice.SelectedItem.ToString() : "(none)";
             settings.Is1440pModeOn = res1440p.Checked;
+            settings.TimecodeOn = worldLT.Checked;
             string json = JsonSerializer.Serialize<FuralityGridNodeSettings>(settings, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
             File.WriteAllText("FuralityGridNodeSettings.json", json);
         }
@@ -73,20 +67,17 @@ namespace FuralityGridNode
             ipInput.Text = settings.ArtNetAddress;
             portInput.Text = settings.ArtNetPort;
             unicast.Checked = settings.Unicast;
-            rigTypeDropdown.SelectedItem = settings.RigType == null ? "VRSL" : settings.RigType;
             midiSavedDevice = settings.MidiDevice;
             res1440p.Checked = settings.Is1440pModeOn;
+            worldLT.Checked = settings.TimecodeOn;
         }
 
         public Form1()
         {
             InitializeComponent();
-            g = this.CreateGraphics();
-            form = this;
+            Graphics g = this.CreateGraphics();
             this.MouseDown += new MouseEventHandler(MainForm_MouseDown);
             g.Clear(Color.Black);
-
-            rigTypeDropdown.SelectedIndex = 0;
 
             if (!File.Exists("FuralityGridNodeSettings.json"))
             {
@@ -99,6 +90,9 @@ namespace FuralityGridNode
 
             populateMidi();
             connectMidi();
+
+            allWindows = FindWindowsByTitle("VRChat", true, true);
+            vrchatWindowSelect.DataSource = allWindows;
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -151,12 +145,203 @@ namespace FuralityGridNode
 
         [DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [DllImport("user32.dll")]
-        public static extern bool ReleaseCapture();
 
-        // Define the necessary constants
-        public const int WM_NCLBUTTONDOWN = 0xA1;
-        public const int HTCAPTION = 0x2;
+        [DllImport("user32.dll")]
+        public static extern bool ReleaseCapture(); [DllImport("user32.dll")]
+        static extern bool GetWindowLongPtr(IntPtr hWnd, int nIndex, out long dwNewLong);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern long GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool AdjustWindowRectEx(ref RECT lpRect, uint dwStyle, bool bMenu, uint dwExStyle);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("user32.dll")]
+        static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct RECT { public int Left, Top, Right, Bottom; }
+
+        const int GWL_STYLE = -16;
+        const int GWL_EXSTYLE = -20;
+        const uint SWP_NOMOVE = 0x0002;
+        const uint SWP_NOZORDER = 0x0004;
+        const int WM_NCLBUTTONDOWN = 0xA1;
+        const int HTCAPTION = 0x2;
+
+        void SetWindowSize(IntPtr hwnd, int width, int height)
+        {
+            uint style = (uint)GetWindowLongPtr(hwnd, GWL_STYLE);
+            uint exStyle = (uint)GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+
+            RECT rect = new RECT { Left = 0, Top = 0, Right = width, Bottom = height };
+            AdjustWindowRectEx(ref rect, style, false, exStyle);
+
+            int totalW = rect.Right - rect.Left;
+            int totalH = rect.Bottom - rect.Top;
+
+            SetWindowPos(hwnd, IntPtr.Zero, 0, 0, totalW, totalH, SWP_NOMOVE | SWP_NOZORDER);
+        }
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
+        [DllImport("user32.dll")]
+        private static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        public static IntPtr[] FindWindowsByTitle(string title, bool exactMatch = false, bool visibleOnly = true)
+        {
+            var results = new List<IntPtr>();
+
+            EnumWindows((hWnd, lParam) =>
+            {
+                if (visibleOnly && !IsWindowVisible(hWnd))
+                    return true; // keep enumerating
+
+                int length = GetWindowTextLength(hWnd);
+                if (length == 0)
+                    return true;
+
+                var sb = new StringBuilder(length + 1);
+                GetWindowText(hWnd, sb, sb.Capacity);
+                string windowTitle = sb.ToString();
+
+                bool match = exactMatch
+                    ? string.Equals(windowTitle, title, StringComparison.Ordinal)
+                    : windowTitle.IndexOf(title, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                if (match)
+                    results.Add(hWnd);
+
+                return true; // continue enumeration
+            }, IntPtr.Zero);
+
+            return results.ToArray();
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int width, int height);
+
+        [DllImport("gdi32.dll")]
+        private static extern IntPtr SelectObject(IntPtr hdc, IntPtr hObject);
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteObject(IntPtr hObject);
+
+        [DllImport("gdi32.dll")]
+        private static extern bool DeleteDC(IntPtr hdc);
+
+        [DllImport("gdi32.dll")]
+        private static extern int GetDIBits(IntPtr hdc, IntPtr hBitmap, uint start, uint lines,
+            IntPtr buffer, ref BITMAPINFO2 bmi, uint usage);
+
+        [DllImport("user32.dll")]
+        private static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, uint nFlags);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct BITMAPINFO2
+        {
+            public int biSize, biWidth, biHeight;
+            public short biPlanes, biBitCount;
+            public int biCompression, biSizeImage, biXPelsPerMeter, biYPelsPerMeter, biClrUsed, biClrImportant;
+        }
+
+        [DllImport("user32.dll")]
+        static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        private void setVRChatFocus_Click(object sender, EventArgs e)
+        {
+            if (vrchatWindowSelect.SelectedItem == null)
+                return;
+
+            IntPtr hwnd = (IntPtr)vrchatWindowSelect.SelectedItem;
+
+            SetForegroundWindow(hwnd);
+        }
+
+        uint PW_CLIENTONLY = 0x1;
+        uint PW_RENDERFULLCONTENT = 0x2;
+
+        IntPtr hWnd;
+        IntPtr hdcWindow;
+        IntPtr hdcMem;
+        IntPtr hBitmap;
+        public int SizeX;
+        public int SizeY;
+        int pixelCount;
+        byte[] srcBuffer;
+        byte[] result;
+        GCHandle pin;
+        BITMAPINFO2 bmi;
+        public void CaptureSetup(IntPtr hwnd, int width = 265, int height = 52)
+        {
+            this.hWnd = hwnd;
+            SizeX = width;
+            SizeY = height;
+            pixelCount = width * height;
+
+            hdcWindow = GetDC(hWnd);
+            hdcMem = CreateCompatibleDC(hdcWindow);
+            hBitmap = CreateCompatibleBitmap(hdcWindow, width, height);
+            SelectObject(hdcMem, hBitmap);
+
+            srcBuffer = new byte[width * 4 * height];
+            pin = GCHandle.Alloc(srcBuffer, GCHandleType.Pinned);
+            result = new byte[pixelCount * 4];
+
+            bmi = new BITMAPINFO2
+            {
+                biSize = 40,
+                biWidth = width,
+                biHeight = -height,
+                biPlanes = 1,
+                biBitCount = 32,
+            };
+        }
+
+        public byte[] Capture()
+        {
+            if (hWnd == IntPtr.Zero)
+                return null;
+
+            PrintWindow(hWnd, hdcMem, PW_CLIENTONLY | PW_RENDERFULLCONTENT);
+
+            GetDIBits(hdcMem, hBitmap, 0, (uint)SizeY, pin.AddrOfPinnedObject(), ref bmi, 0);
+
+            for (int i = 0; i < pixelCount; i++)
+            {
+                int off = i * 4;
+                result[off + 0] = srcBuffer[off + 2]; // R
+                result[off + 1] = srcBuffer[off + 1]; // G
+                result[off + 2] = srcBuffer[off + 0]; // B
+                result[off + 3] = 255;                // A
+            }
+
+            return result;
+        }
+
 
         private void MainForm_MouseDown(object sender, MouseEventArgs e)
         {
@@ -166,9 +351,6 @@ namespace FuralityGridNode
                 SendMessage(this.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
             }
         }
-        public static Graphics g;
-        public static Form1 form;
-        static byte[] combinedData = new byte[512 * 8];
 
         static bool update = false;
         static string statusText = "";
@@ -289,46 +471,80 @@ namespace FuralityGridNode
             return (currentByte & (1 << index)) != 0;
         }
 
-        static void ScaleImage(byte[] src, int srcW, int srcH, int scale, byte[] dst)
+        byte[] ResizeImage(byte[] captured, int inputSizeX, int inputSizeY, float scale)
         {
-            if (dst.Length != srcW * scale * srcH * scale * 4)
-                return;
+            if (captured == null)
+                return null;
 
-            int dstW = srcW * scale;
-            int srcStrideBytes = srcW * 4;
-            int dstStrideBytes = dstW * 4;
+            int outW = (int)(inputSizeX * scale);
+            int outH = (int)(inputSizeY * scale);
+            byte[] result = new byte[outW * outH * 4];
 
-            for (int y = 0; y < srcH; y++)
+            for (int y = 0; y < outH; y++)
             {
-                int srcRowOfs = y * srcStrideBytes;
-                int dstRowOfs = (y * scale) * dstStrideBytes;
-
-                int dstWriteOfs = dstRowOfs;
-                for (int x = 0; x < srcW; x++)
+                int srcY = (int)(y / scale);
+                for (int x = 0; x < outW; x++)
                 {
-                    Buffer.BlockCopy(src, srcRowOfs + x * 4, dst, dstWriteOfs, 4);
-
-                    for (int s = 1; s < scale; s++)
-                    {
-                        Buffer.BlockCopy(dst, dstWriteOfs,
-                                         dst, dstWriteOfs + s * 4,
-                                         4);
-                    }
-
-                    dstWriteOfs += scale * 4;
-                }
-                for (int s = 1; s < scale; s++)
-                {
-                    Buffer.BlockCopy(dst, dstRowOfs,
-                                     dst, dstRowOfs + s * dstStrideBytes,
-                                     dstStrideBytes);
+                    int srcX = (int)(x / scale);
+                    int srcIdx = (srcY * inputSizeX + srcX) * 4;
+                    int dstIdx = (y * outW + x) * 4;
+                    result[dstIdx + 0] = captured[srcIdx + 0];
+                    result[dstIdx + 1] = captured[srcIdx + 1];
+                    result[dstIdx + 2] = captured[srcIdx + 2];
+                    result[dstIdx + 3] = captured[srcIdx + 3];
                 }
             }
+            return result;
         }
 
-        byte[] output = new byte[0];
-        byte[] rawData = new byte[0];
-        byte[] preview = new byte[0];
+        byte[] DrawGrid(byte[] combinedData, int bladeSizeX, int bladeSizeY)
+        {
+            int maxLength = Math.Min(combinedData.Length, 512 * 3);
+
+            byte[] result = new byte[bladeSizeX * bladeSizeY * 4];
+
+            for (int i = 0; i < maxLength; i++)
+            {
+                int turboExpandOffset = i / 6 / bladeSizeX;
+                int x = (i / 6) % bladeSizeX;
+                int y = i % 6;
+                byte currentByte = combinedData[i];
+                for (int j = 0; j < 8; j++)
+                {
+                    int y2 = y * 8 + j;
+                    bool value = GetBit(currentByte, 7 - j);
+                    SetPixel(result, bladeSizeX, bladeSizeY, x, y2 + turboExpandOffset * (bladeSizeY), value);
+                }
+                // at the end of each row, calculate crc
+                if (y == 5)
+                {
+                    byte mask = Crc4For6(combinedData[i - 5], combinedData[i - 4], combinedData[i - 3], combinedData[i - 2], combinedData[i - 1], combinedData[i - 0]);
+                    for (int j = 0; j < 4; j++)
+                    {
+                        bool value = GetBit(mask, 7 - j);
+                        SetPixel(result, bladeSizeX, bladeSizeY, x, (6 * 8 + j) + turboExpandOffset * (bladeSizeY), value);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        bool ReadBit(byte[] colorData, int sizeX, int x, int y)
+        {
+            int idx = x + y * sizeX;
+            return colorData[idx * 4] > 128; // times 4 because it's 4 channels (RGBA)
+        }
+
+        const int bufferSizeInSeconds = 20;
+        const float delayInSeconds = 15.0f;
+        const int bufferSize = 30 * bufferSizeInSeconds;
+        int currentBufferIndex = 0;
+        double[] timecodeBuffer = new double[bufferSize]; // 10 seconds
+        byte[][] dataBuffer = new byte[bufferSize][];
+
+        Stopwatch sw = new Stopwatch();
+        IntPtr hwndLast;
         public void DrawData(byte[] combinedData)
         {
             long checkTimestamp;
@@ -336,169 +552,103 @@ namespace FuralityGridNode
             long startTimestamp = checkTimestamp;
 
             string debug = "";
-            outputScale = 16;
-            previewScale = 4;
-            bladeSizeX = 120;
-            bladeSizeY = 13;
 
-            string selectedItem = rigTypeDropdown.SelectedItem as string;
+            if (vrchatWindowSelect.SelectedItem != null)
+            {
+                IntPtr hwnd = (IntPtr)vrchatWindowSelect.SelectedItem;
+                if (hwnd != hwndLast)
+                {
+                    hwndLast = hwnd;
+                    CaptureSetup(hwnd, 256 * 4, 52 * 4);
+                }
+            }
 
-            //largeCRC.Enabled = (selectedItem == "Binary");
-            selectRig.Enabled = (selectedItem == "FRig");
-            LoadLayout.Enabled = !(selectedItem == "Binary");
-            UnloadLayout.Enabled = !(selectedItem == "Binary");
+            if (!sw.IsRunning)
+                sw.Start();
+
+            double timecode = (sw.ElapsedMilliseconds / 1000.0) + 100.0; // start 100 seconds in
+            byte[] bytes = BitConverter.GetBytes((int)(timecode*100));
+            if (combinedData.Length >= 3)
+            {
+                combinedData[0] = bytes[0];
+                combinedData[1] = bytes[1];
+                combinedData[2] = bytes[2];
+            }
+
+            double timecodePlayout = timecode - delayInSeconds;
+
+            byte[] captured = Capture();
+            byte[] resized = ResizeImage(captured, 256*4, 52 * 4, 0.25f);// new byte[256 * 52 * 4];
+            // decode timecode from game
+            double timecodeFromBot = 0;
+            bool[] bits = new bool[3 * 8];
+            if (captured != null)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        bits[(i*8)+j] = ReadBit(resized, 256, 0, (i * 8) + (7-j));
+                    }
+                }
+                int[] data = new int[1];
+                new BitArray(bits).CopyTo(data, 0);
+                // we can think of this timecode as a "cursor", the times at which the LT's performance is being played out.
+                // because of the buffer, it may end up a little in the past.. so we need to buffer a bunch of it and wait
+                // for the current time to catch up.
+                timecodeFromBot = data[0] / 100.0;
+                
+                timecodeBuffer[currentBufferIndex] = timecodeFromBot;
+                dataBuffer[currentBufferIndex] = captured;
+                currentBufferIndex++;
+                currentBufferIndex %= bufferSize;
+
+                if (captured.Length == (256*4 * 52*4)*4)
+                {
+                    spout.SendImage(captured, 256*4, 52*4);
+                }
+            }
+
+            double smallestDelta = 99999;
+            int smallestDeltaIdx = -1;
+            for (int i = 0; i < timecodeBuffer.Length; i++)
+            {
+                double delta = Math.Abs(timecodeBuffer[i] - timecodePlayout);
+                if (delta < smallestDelta)
+                {
+                    smallestDeltaIdx = i;
+                    smallestDelta = delta;
+                }
+            }
+
+            double closestTimecode = -1;
+
+            if (smallestDeltaIdx >= 0)
+            {
+                closestTimecode = timecodeBuffer[smallestDeltaIdx];
+            }
+
+            debug += "closest timecode: " + closestTimecode.ToString("0.00") + "\n";
+            debug += "timecode: " + timecode.ToString("0.00") + "\n";
+            debug += "timecodeFromBot: " + timecodeFromBot.ToString("0.00") + "\n";
+            debug += "timecodePlayout: " + timecodePlayout.ToString("0.00") + "\n";
+            debug += "\n";
+
             if (framerate)
                 debug += "FRAMERATE\n";
             else
                 debug += "\n";
+
             debug += "setup: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
             checkTimestamp = Stopwatch.GetTimestamp();
 
-            if (selectedItem == "VRSL")
-            {
-                if (customLayout)
-                {
-                    bladeSizeX = customLayoutBladeSizeX;
-                    bladeSizeY = customLayoutBladeSizeY;
-                }
+            int bladeSizeX = res1440p.Checked ? 640 : 480;
+            int bladeSizeY = 8 * 6 + 4;
+            int outputScale = 4;
 
-                rawData = new byte[bladeSizeX * bladeSizeY * 4];
-                int countX = bladeSizeX;
-                int countY = bladeSizeY;
-                int maxUniverse = 3;
-                if (customLayout)
-                    maxUniverse = 8;
-
-                for (int universe = 0; universe < maxUniverse; universe++)
-                {
-                    for (int i = 0; i < 512; i++)
-                    {
-                        int channel = i + universe * 512;
-                        if (channel >= combinedData.Length)
-                            break;
-                        byte data = combinedData[channel];
-
-                        channel = i + universe * 520;
-                        int x = channel / countY;
-                        int y = channel % countY;
-
-                        if (customLayout)
-                        {
-                            if (channel >= layoutMapping.Count)
-                                continue;
-                            x = layoutMapping[channel].x;
-                            y = layoutMapping[channel].y;
-                        }
-
-                        SetPixel(rawData, bladeSizeX, bladeSizeY, x, y, data, data, data, 255);
-                    }
-                }
-            }
-            else if (selectedItem == "FRig")
-            {
-                if (customLayout)
-                {
-                    bladeSizeX = customLayoutBladeSizeX;
-                    bladeSizeY = customLayoutBladeSizeY;
-                }
-
-                rawData = new byte[bladeSizeX * bladeSizeY * 4];
-                int countX = bladeSizeX;
-                int countY = bladeSizeY;
-                if (currentRig != null && currentRig.Fixtures != null)
-                {
-                    int index = 0;
-                    foreach (Fixture fixture in currentRig.Fixtures)
-                    {
-                        int gridX = fixture.GridChannel / countY;
-                        int gridY = fixture.GridChannel % countY;
-                        if (customLayout)
-                        {
-                            if (fixture.GridChannel >= layoutMapping.Count)
-                                continue;
-                            gridX = layoutMapping[fixture.GridChannel].x;
-                            gridY = layoutMapping[fixture.GridChannel].y;
-                        }
-                        int pixelX = gridX;
-                        int pixelY = gridY;
-                        byte data = 0;
-
-                        if (IsValidIndex(combinedData, fixture.UnityChannel - 1))
-                            data = combinedData[fixture.UnityChannel - 1];
-                
-                        int color = fixture.GridColor;
-
-                        if (fixture.GridColor == 0)
-                        {
-                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255, true, false, false, true);
-                        }
-                        if (fixture.GridColor == 1)
-                        {
-                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255, false, true, false, true);
-                        }
-                        if (fixture.GridColor == 2)
-                        {
-                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255, false, false, true, true);
-                        }
-                        if (fixture.GridColor == 3)
-                        {
-                            SetPixel(rawData, bladeSizeX, bladeSizeY, pixelX, pixelY, data, data, data, 255);
-                        }
-
-                        index++;
-                    }
-                }
-                else
-                {
-                    var frigFile = new FRigFile();
-                    if (FuralityGridNode.Properties.Resources.Blockout != null)
-                    {
-                        var frigBase = Encoding.UTF8.GetString(FuralityGridNode.Properties.Resources.Blockout);
-                        currentRig = frigFile.LoadFromJsonString(frigBase).ConvertToFRig();
-                    }
-                }
-            }
-            else if (selectedItem == "Binary")
-            {
-                outputScale = 4;
-                previewScale = 1;
-                int turboExpandSize = 1;
-                if (turboExpand.Checked)
-                    turboExpandSize = 5;
-
-                bladeSizeX = res1440p.Checked ? 640 : 480;
-                bladeSizeY = 52 * turboExpandSize;
-
-                rawData = new byte[bladeSizeX * bladeSizeY * 4];
-
-                for (int i = 0; i < combinedData.Length; i++)
-                {
-                    int turboExpandOffset = i / 6 / bladeSizeX;
-                    int x = (i / 6) % bladeSizeX;
-                    int y = i % 6;
-                    byte currentByte = combinedData[i];
-                    for (int j = 0; j < 8; j++)
-                    {
-                        int y2 = y * 8 + j;
-                        bool value = GetBit(currentByte, 7 - j);
-                        SetPixel(rawData, bladeSizeX, bladeSizeY, x, y2 + turboExpandOffset * (bladeSizeY / turboExpandSize), value);
-                    }
-                    // at the end of each row, calculate crc
-                    if (y == 5) 
-                    {
-                        byte mask = Crc4For6(combinedData[i - 5], combinedData[i - 4], combinedData[i - 3], combinedData[i - 2], combinedData[i - 1], combinedData[i - 0]);
-                        for (int j = 0; j < 4; j++)
-                        {
-                            bool value = GetBit(mask, 7 - j);
-                            SetPixel(rawData, bladeSizeX, bladeSizeY, x, (6 * 8 + j) + turboExpandOffset * (bladeSizeY / turboExpandSize), value);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                return;
-            }
+            byte[] grid = DrawGrid(combinedData, bladeSizeX, bladeSizeY);
+            byte[] output = ResizeImage(grid, bladeSizeX, bladeSizeY, outputScale);
+            spoutForLT.SendImage(output, bladeSizeX * outputScale, bladeSizeY * outputScale);
 
             if (midiOutput != null)
             {
@@ -520,17 +670,17 @@ namespace FuralityGridNode
                                 break;
                             }
                             midiData[i] = combinedData[i];
-
+            
                             int bank = i / 2048;
-
+            
                             if (bank != bankStatus)
                             {
                                 ChangeBanks(bank);
                                 midiUpdates++;
                             }
-
+            
                             int t = i - (bank * 2048);
-
+            
                             if (t < 1024)
                             {
                                 NoteOnEvent noteOn = new NoteOnEvent();
@@ -549,21 +699,21 @@ namespace FuralityGridNode
                             }
                         }
                     }
-
+            
                     if (midiUpdates < midiCap)
                     {
                         midiCatchup = 0;
                     }
-
+            
                     midiStatus.Text = "Connected - Sending Data";
                     midiStatus.ForeColor = Color.Black;
-
+            
                     midiScanPosition += scanCap;
                     if (midiScanPosition > maxMidiChannels)
                     {
                         midiScanPosition = 0;
                     }
-
+            
                     midiWatchdog();
                     midiUpdate = Stopwatch.GetTimestamp();
                 } else
@@ -574,94 +724,54 @@ namespace FuralityGridNode
                         midiCatchup = 0;
                         midiStatus.Text = "Connected - Waiting";
                         midiStatus.ForeColor = Color.Black;
-
+            
                         midiReset();
-
+            
                         midiUpdate = Stopwatch.GetTimestamp();
                     }
                 }
             }
-            
+
+            DrawImage(gridPreview.CreateGraphics(), grid, bladeSizeX, bladeSizeY);
             debug += "render: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
             checkTimestamp = Stopwatch.GetTimestamp();
-            // scale up
-            //if (output.Length != bladeSizeX * bladeSizeY * 4 * outputScale * outputScale)
-                output = new byte[bladeSizeX * bladeSizeY * 4 * outputScale * outputScale];
 
-            string spoutStatus = $"Spout Output - {bladeSizeX * outputScale}x{bladeSizeY * outputScale}";
-            if (spoutStatus != gridPreview.Text)
-            {
-                gridPreview.Text = spoutStatus;
-            }
-
-            ScaleImage(rawData, bladeSizeX, bladeSizeY, outputScale, output);
-
-            debug += "scale output: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
-            checkTimestamp = Stopwatch.GetTimestamp();
-
-            // send to spout
-            SpoutWrapper.SendImage(output, bladeSizeX * outputScale, bladeSizeY * outputScale);
-
-            debug += "spout send: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
-            checkTimestamp = Stopwatch.GetTimestamp();
-
-            // draw preview
-            int previewSizeX = (bladeSizeX * previewScale);
-            int previewSizeY = (bladeSizeY * previewScale);
-            //if (preview.Length != previewSizeX * previewSizeY * 4)
-               preview = new byte[previewSizeX * previewSizeY * 4];
-            for (int i = 0; i < (previewSizeX * previewSizeY); i++)
-            {
-                int x = (i % previewSizeX);
-                int y = (i / previewSizeX);
-
-                int i2 = x + y * previewSizeX;
-
-                int j = ((x / previewScale) + (y / previewScale) * (previewSizeX / previewScale));
-                preview[i*4+0] = rawData[j*4+0]; // R
-                preview[i*4+1] = rawData[j*4+1]; // G
-                preview[i*4+2] = rawData[j*4+2]; // B
-                preview[i*4+3] = rawData[j*4+3]; // A
-            }
-
-            debug += "scale preview: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
-            checkTimestamp = Stopwatch.GetTimestamp();
-            // win32 fast draw byte[] to a control. Idk why the default C# functions are so disgustingly slow.
-            GCHandle pinnedArray = GCHandle.Alloc(preview, GCHandleType.Pinned);
-            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-            Graphics gr = gridPreview.CreateGraphics();
-            IntPtr hdc = gr.GetHdc();
-            BITMAPINFO bmi = new BITMAPINFO();
-            bmi.bmiHeader = new BITMAPINFOHEADER
-            {
-                biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
-                biWidth = previewSizeX,
-                biHeight = -previewSizeY, // Negative height to indicate a top-down DIB
-                biPlanes = 1,
-                biBitCount = 32,
-                biCompression = 0, // BI_RGB
-                biSizeImage = (uint)(previewSizeX * previewSizeY) // pixel count
-            };
-            StretchDIBits(hdc, 8, 16, previewSizeX, previewSizeY, 0, 0, previewSizeX, previewSizeY, pointer, ref bmi, 0, 0x00CC0020);
-            gr.ReleaseHdc(hdc);
-            pinnedArray.Free();
-
-            debug += "draw: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
             long totalTime = (Stopwatch.GetTimestamp() - startTimestamp) * 1000 * 1000 / Stopwatch.Frequency;
             framerate = totalTime > 33000;
             if(framerate)
                 slow.ForeColor = Color.Red;
             else
                 slow.ForeColor = Color.Black;
+            slow.Text = debug;
         }
 
-        bool framerate = false;
+        void DrawImage(Graphics gr, byte[] data, int sizeX, int sizeY)
+        {
+            GCHandle pinnedArray = GCHandle.Alloc(data, GCHandleType.Pinned);
+            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+
+            IntPtr hdc = gr.GetHdc();
+            BITMAPINFO bmi = new BITMAPINFO();
+            bmi.bmiHeader = new BITMAPINFOHEADER
+            {
+                biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
+                biWidth = sizeX,
+                biHeight = -sizeY, // Negative height to indicate a top-down DIB
+                biPlanes = 1,
+                biBitCount = 32,
+                biCompression = 0, // BI_RGB
+                biSizeImage = (uint)(sizeX * sizeY) // pixel count
+            };
+            StretchDIBits(hdc, 8, 16, sizeX, sizeY, 0, 0, sizeX, sizeY, pointer, ref bmi, 0, 0x00CC0020);
+            gr.ReleaseHdc(hdc);
+            pinnedArray.Free();
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            spoutForLT = new SpoutWrapper("PHC GridNode - For LT", true);
+            spout = new SpoutWrapper("PHC GridNode", true);
             StartArtNetClient();
-            SpoutWrapper.CreateSender("Furality Grid Node");
-            //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
         }
 
         void StartArtNetClient()
@@ -676,10 +786,7 @@ namespace FuralityGridNode
             {
                 float sin2 = (float)Math.Sin(testAnimationTime * 8.0f) * 0.5f + 0.5f;
                 byte[] data;
-                if (customLayout)
-                    data = new byte[layoutMapping.Count*4];
-                else
-                    data = new byte[(int)(512 * 16 * sin2)];
+                data = new byte[(int)(512 * 16 * sin2)];
 
                 for (int i = 0; i < data.Length; i++)
                 {
@@ -754,134 +861,11 @@ namespace FuralityGridNode
             }
         }
 
-        private void selectRig_Click(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                openFileDialog.Filter = "FRig Files (*.frig)|*.frig|All Files (*.*)|*.*";
-                openFileDialog.Title = "Select FRig File";
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    string filePath = openFileDialog.FileName;
-#if DEBUG
-                    Trace.WriteLine($"Yay it found the file, path: {filePath}");
-#endif
-                    LoadFRigFile(filePath);
-                }
-            }
-        }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-        }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
             Application.Exit();
             Environment.Exit(0);
-        }
-
-        private FRig currentRig;
-        private void LoadFRigFile(string filePath)
-        {
-            try
-            {
-                // Use the static FromJson method here too for consistency and error handling
-                FRigFile frigFile = new FRigFile();
-                frigFile = frigFile.LoadFromFile(filePath);
-                currentRig = frigFile.ConvertToFRig();
-                if (currentRig != null)
-                {
-                    Trace.WriteLine($"FRig file loaded");
-                    if (currentRig.Fixtures != null)
-                        Trace.WriteLine($"FRig fixtures loaded successfully. Version: Micca Broke it, Fixtures: {currentRig.Fixtures.Length}");
-                } else {
-                     Trace.WriteLine($"Failed to load FRig file: {filePath}");
-                     // Optionally show a MessageBox error here as well
-                }
-            }
-            catch (Exception ex)
-            {
-                // Catch potential File IO errors or other unexpected exceptions
-                MessageBox.Show($"Error loading FRig file: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                currentRig = null; // Ensure rig is null on error
-            }
-        }
-
-
-        [Serializable]
-        struct DMXCoord
-        {
-            public float uvX;
-            public float uvY;
-            public int dmxX;
-            public int dmxY;
-            public int channel;
-        }
-
-        [Serializable]
-        class DMXLayout
-        {
-            public int resolutionX;
-            public int resolutionY;
-            public int dmxSizeX;
-            public int dmxSizeY;
-            public int channelCount;
-            public List<DMXCoord> coords = new List<DMXCoord>();
-        }
-        Dictionary<int, (int x, int y)> layoutMapping;
-
-        private void LoadLayout_Click(object sender, EventArgs e)
-        {
-            layoutStatus.Text = "Loading...";
-
-            OpenFileDialog f = new OpenFileDialog();
-            f.Title = "Select Layout File.";
-            f.Filter = "Json files (*.json) | *.json";
-
-            if (f.ShowDialog() != DialogResult.OK)
-                return;
-
-            if (!File.Exists(f.FileName))
-                return;
-
-            string json = File.ReadAllText(f.FileName);
-            DMXLayout layout = JsonSerializer.Deserialize<DMXLayout>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive=false, IncludeFields = true, WriteIndented = true });
-
-            //this.Size = new Size(layout.resolutionX, layout.resolutionY);
-
-            customLayoutBladeSizeX = layout.dmxSizeX;
-            customLayoutBladeSizeY = layout.dmxSizeY;
-
-            layoutMapping = new Dictionary<int, (int x, int y)>();
-            for (int i = 0; i < layout.coords.Count; i++)
-            {
-                if (layout.coords[i].uvX < 0 || layout.coords[i].uvX > 1 || layout.coords[i].uvY < 0 || layout.coords[i].uvY > 1)
-                {
-                    MessageBox.Show("Layout file had data outside of the screen and will not load.", "Layout file error.");
-                    //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
-                    return;
-                }
-                layoutMapping.Add(i, ((layout.coords[i].dmxX), (layout.coords[i].dmxY)));
-            }
-
-            //layoutStatus.Text = $"{Path.GetFileNameWithoutExtension(f.FileName)}\nsize: {layout.resolutionX}x{layout.resolutionY}\nchannels: {layout.channelCount}";
-            customLayout = true;
-            layoutStatus.Text = "";
-        }
-
-        private void UnloadLayout_Click(object sender, EventArgs e)
-        {
-            customLayout = false;
-            //bladeSizeX = 120;
-            //bladeSizeY = 13;
-            //layoutStatus.Text = $"VRSL\nsize: 1920x208\nchannels: 1560";
-        }
-
-
-        private void groupBox3_Enter(object sender, EventArgs e)
-        {
-            
         }
 
         private void populateMidi()
@@ -992,8 +976,6 @@ namespace FuralityGridNode
             {
                 logStream.Position = logStream.Length - 1;
             }
-
-            //logStream.ReadTimeout = 10;
         }
 
         private bool isMidiReady()
@@ -1086,21 +1068,17 @@ namespace FuralityGridNode
             midiReset();
         }
 
-        private void layoutStatus_Click(object sender, EventArgs e)
+        private void screenshot(object sender, EventArgs e)
         {
-
-        }
-
-        private void button1_Click_2(object sender, EventArgs e)
-        {
-            int previewSizeX = (bladeSizeX * previewScale);
-            int previewSizeY = (bladeSizeY * previewScale);
-
-            int outputSizeX = bladeSizeX * outputScale;
-            int outputSizeY = bladeSizeY * outputScale;
-
+            return;
+            int previewSizeX = 0;//bladeSizeX * previewScale);
+            int previewSizeY = 0;//(bladeSizeY * previewScale);
+            
+            int outputSizeX = 0;//ladeSizeX * outputScale;
+            int outputSizeY = 0;//bladeSizeY * outputScale;
+            
             Bitmap image = new Bitmap(outputSizeX, outputSizeY, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
+            
             GCHandle pinnedArray = GCHandle.Alloc(preview, GCHandleType.Pinned);
             IntPtr pointer = pinnedArray.AddrOfPinnedObject();
             Graphics gr = Graphics.FromImage(image);
@@ -1119,58 +1097,38 @@ namespace FuralityGridNode
             StretchDIBits(hdc, 0, 0, outputSizeX, outputSizeY, 0, 0, previewSizeX, previewSizeY, pointer, ref bmi, 0, 0x00CC0020);
             gr.ReleaseHdc(hdc);
             pinnedArray.Free();
-
+            
             string filename = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss fff");
-
+            
             image.Save($"{filename}.png", ImageFormat.Png);
         }
 
-
         float testAnimationTime = 0;
+        IntPtr[] allWindows;
+
         private void testAnimation_Click(object sender, EventArgs e)
         {
             // clear all overwrites when test animation plays
             testAnimationTime = 1.0f;
         }
 
-        // for now we assume the users doesn't put very many overwrites.
-        //private void testingSet_Click(object sender, EventArgs e)
-        //{
-        //    int universe;
-        //    int channel;
-        //    int value;
-        //    if (!int.TryParse(testingUniverse.Text, out universe))
-        //        return;
-        //    if (!int.TryParse(testingChannel.Text, out channel))
-        //        return;
-        //    if (!int.TryParse(testingValue.Text, out value))
-        //        return;
-        //
-        //    value = Math.Min(Math.Max(value, 0), 255);
-        //    channel = Math.Min(Math.Max(channel, 0), 511);
-        //    universe = Math.Min(Math.Max(universe, 1), 100);
-        //
-        //    artnetClient.combinedData[(universe-1) * 512 + channel] = (byte)value;
-        //}
-
-        private void testingClearAll_Click(object sender, EventArgs e)
+        private void setVRChatSize_Click(object sender, EventArgs e)
         {
-            Array.Clear(artnetClient.combinedData, 0, artnetClient.combinedData.Length);
+            if (vrchatWindowSelect.SelectedItem == null)
+                return;
+
+            IntPtr hwnd = (IntPtr)vrchatWindowSelect.SelectedItem;
+
+            if (res1440p.Checked)
+                SetWindowSize(hwnd, 2560, 1440);
+            else
+                SetWindowSize(hwnd, 1920, 1080);
         }
 
-        private void checkBox1_CheckedChanged_2(object sender, EventArgs e)
+        private void refresh_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void turboExpand_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label5_Click(object sender, EventArgs e)
-        {
-
+            allWindows = FindWindowsByTitle("VRChat", true, true);
+            vrchatWindowSelect.DataSource = allWindows;
         }
     }
 }
