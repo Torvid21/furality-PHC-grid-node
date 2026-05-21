@@ -719,7 +719,7 @@ namespace FuralityGridNode
                 {
                     byte[] grid = DrawGrid(closestBuffer, bladeSizeX, bladeSizeY);
                     DrawImage(gridPreviewMainStream.CreateGraphics(), grid, bladeSizeX, bladeSizeY);
-                    byte[] grid4 = ResizeImage(timecodeGrid, bladeSizeX, bladeSizeY, 4);
+                    byte[] grid4 = ResizeImage(grid, bladeSizeX, bladeSizeY, 4);
                     spoutForMainStream.SendImage(grid4, bladeSizeX * 4, bladeSizeY * 4);
                 }
                 //string debug = "";
