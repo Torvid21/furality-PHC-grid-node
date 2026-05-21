@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -29,7 +30,7 @@ namespace FuralityGridNode
 
         bool framerate = false;
         SpoutWrapper spoutForLT;
-        SpoutWrapper spout;
+        SpoutWrapper spoutForMainStream;
 
         private FileStream logStream;
 
@@ -50,13 +51,13 @@ namespace FuralityGridNode
         public void SaveSettings()
         {
             FuralityGridNodeSettings settings = new FuralityGridNodeSettings();
-            settings.ArtNetAddress = ipInput.Text;
-            settings.ArtNetPort = portInput.Text;
-            settings.Unicast = unicast.Checked;
+            settings.ArtNetAddress = artNetIpRecieveInput.Text;
+            settings.ArtNetPort = artNetRecievePortInput.Text;
+            settings.Unicast = artNetUnicast.Checked;
             //settings.RigType = rigTypeDropdown.SelectedItem != null ? rigTypeDropdown.SelectedItem.ToString() : "Binary";
             settings.MidiDevice = midiDevice.SelectedItem != null ? midiDevice.SelectedItem.ToString() : "(none)";
-            settings.Is1440pModeOn = res1440p.Checked;
-            settings.TimecodeOn = worldLT.Checked;
+            //settings.Is1440pModeOn = res1440p.Checked;
+            settings.TimecodeOn = generateTimecode.Checked;
             string json = JsonSerializer.Serialize<FuralityGridNodeSettings>(settings, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
             File.WriteAllText("FuralityGridNodeSettings.json", json);
         }
@@ -64,12 +65,12 @@ namespace FuralityGridNode
         {
             string json = File.ReadAllText("FuralityGridNodeSettings.json");
             FuralityGridNodeSettings settings = JsonSerializer.Deserialize<FuralityGridNodeSettings>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = false, IncludeFields = true, WriteIndented = true });
-            ipInput.Text = settings.ArtNetAddress;
-            portInput.Text = settings.ArtNetPort;
-            unicast.Checked = settings.Unicast;
+            artNetIpRecieveInput.Text = settings.ArtNetAddress;
+            artNetRecievePortInput.Text = settings.ArtNetPort;
+            artNetUnicast.Checked = settings.Unicast;
             midiSavedDevice = settings.MidiDevice;
-            res1440p.Checked = settings.Is1440pModeOn;
-            worldLT.Checked = settings.TimecodeOn;
+            //res1440p.Checked = settings.Is1440pModeOn;
+            generateTimecode.Checked = settings.TimecodeOn;
         }
 
         public Form1()
@@ -259,6 +260,18 @@ namespace FuralityGridNode
 
         [DllImport("user32.dll")]
         private static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, uint nFlags);
+
+        [DllImport("user32.dll")]
+        static extern bool GetClientRect(IntPtr hWnd, out RECT lpRect);
+
+        public Size GetCaptureSize(bool clientAreaOnly = false)
+        {
+            RECT r;
+            if (clientAreaOnly) GetClientRect(this.Handle, out r);
+            else GetWindowRect(this.Handle, out r);
+            return new Size(r.Right - r.Left, r.Bottom - r.Top);
+        }
+
 
         [StructLayout(LayoutKind.Sequential)]
         private struct BITMAPINFO2
@@ -496,6 +509,48 @@ namespace FuralityGridNode
             }
             return result;
         }
+        public static byte[] BoolArrayToByteArray(bool[] bits)
+        {
+            int numBytes = (bits.Length + 7) / 8;
+            byte[] bytes = new byte[numBytes];
+
+            for (int i = 0; i < bits.Length; i++)
+            {
+                if (bits[i])
+                    bytes[i / 8] |= (byte)(1 << (7 - (i % 8))); // MSB-first
+            }
+
+            return bytes;
+        }
+
+        bool ReadBit(byte[] colorData, int sizeX, int x, int y)
+        {
+            int idx = x + y * sizeX;
+            return colorData[idx * 4] > 128; // times 4 because it's 4 channels (RGBA)
+        }
+
+        byte[] ReadGrid(byte[] colors, int bladeSizeX, int bladeSizeY)
+        {
+            if (colors == null)
+                return null;
+
+            int bytes = ((bladeSizeY - 4)/6) * bladeSizeX;
+
+            bool[] bits = new bool[bytes * 8];
+            for (int byteIndex = 0; byteIndex < bytes; byteIndex++)
+            {
+                for (int bitIndex = 0; bitIndex < 8; bitIndex++)
+                {
+                    int y = ((byteIndex%6) * 8) + (7 - bitIndex);
+                    int x = byteIndex / 6;
+                    bits[byteIndex * 8 + (7 - bitIndex)] = ReadBit(colors, bladeSizeX, x, y);
+                }
+            }
+
+            byte[] data = BoolArrayToByteArray(bits);
+
+            return data;
+        }
 
         byte[] DrawGrid(byte[] combinedData, int bladeSizeX, int bladeSizeY)
         {
@@ -529,29 +584,33 @@ namespace FuralityGridNode
 
             return result;
         }
-
-        bool ReadBit(byte[] colorData, int sizeX, int x, int y)
-        {
-            int idx = x + y * sizeX;
-            return colorData[idx * 4] > 128; // times 4 because it's 4 channels (RGBA)
-        }
-
-        const int bufferSizeInSeconds = 20;
-        const float delayInSeconds = 15.0f;
+        const int bufferSizeInSeconds = 15;
+        const float delayInSeconds = 10.0f;
         const int bufferSize = 30 * bufferSizeInSeconds;
         int currentBufferIndex = 0;
         double[] timecodeBuffer = new double[bufferSize]; // 10 seconds
         byte[][] dataBuffer = new byte[bufferSize][];
 
+        bool writingRecieveData = false;
+        //byte[] RecieveData;
+        //public void RecieveTCP(byte[] data, IPAddress IP, int port)
+        //{
+        //    writingRecieveData = true;
+        //    RecieveData = data;
+        //    writingRecieveData = false;
+        //}
+
         Stopwatch sw = new Stopwatch();
         IntPtr hwndLast;
-        public void DrawData(byte[] combinedData)
+        string debug = "";
+        public void DrawData(byte[] combinedData, bool recieve, bool send)
         {
-            long checkTimestamp;
-            checkTimestamp = Stopwatch.GetTimestamp();
-            long startTimestamp = checkTimestamp;
+            //var size = GetCaptureSize();
+            
+            //debug += "4x window size: " + size.Width * 4 + ", " + size.Height * 4 + "\n";
 
-            string debug = "";
+            int bladeSizeX = 480;
+            int bladeSizeY = 8 * 6 + 4;
 
             if (vrchatWindowSelect.SelectedItem != null)
             {
@@ -559,190 +618,235 @@ namespace FuralityGridNode
                 if (hwnd != hwndLast)
                 {
                     hwndLast = hwnd;
-                    CaptureSetup(hwnd, 256 * 4, 52 * 4);
+                    CaptureSetup(hwnd, bladeSizeX * 4, bladeSizeY * 4);
                 }
             }
 
-            if (!sw.IsRunning)
-                sw.Start();
 
-            double timecode = (sw.ElapsedMilliseconds / 1000.0) + 100.0; // start 100 seconds in
-            byte[] bytes = BitConverter.GetBytes((int)(timecode*100));
-            if (combinedData.Length >= 3)
+            if (send)
             {
-                combinedData[0] = bytes[0];
-                combinedData[1] = bytes[1];
-                combinedData[2] = bytes[2];
+                byte[] captured = Capture();
+                byte[] resized = ResizeImage(captured, bladeSizeX * 4, bladeSizeY * 4, 0.25f);
+                byte[] decoded = ReadGrid(resized, bladeSizeX, bladeSizeY);
+                DrawImage(gridPreviewLTRecording.CreateGraphics(), resized, bladeSizeX, bladeSizeY);
+
+                artnetClient.Send(decoded, artNetIpSendInput.Text, artNetSendPortInput.Text);
             }
-
-            double timecodePlayout = timecode - delayInSeconds;
-
-            byte[] captured = Capture();
-            byte[] resized = ResizeImage(captured, 256*4, 52 * 4, 0.25f);// new byte[256 * 52 * 4];
-            // decode timecode from game
-            double timecodeFromBot = 0;
-            bool[] bits = new bool[3 * 8];
-            if (captured != null)
+            else if (recieve)
             {
-                for (int i = 0; i < 3; i++)
+                long checkTimestamp;
+                checkTimestamp = Stopwatch.GetTimestamp();
+                long startTimestamp = checkTimestamp;
+
+                if (!sw.IsRunning)
+                    sw.Start();
+
+                double timecode = (sw.ElapsedMilliseconds / 1000.0) + 100.0; // start 100 seconds in so we never have negative values.
+                debug += "generaed timecode: " + timecode.ToString("0.00") + "\n";
+
+                if (combinedData == null)
+                    return;
+
+                if (combinedData.Length < 128)
+                    return;
+
+                // draw timecode for LT
+                byte[] timecodeData = new byte[combinedData.Length];
+                if (generateTimecode.Checked)
                 {
-                    for (int j = 0; j < 8; j++)
+                    byte[] bytes = BitConverter.GetBytes((int)(timecode * 100));
+                    if (timecodeData.Length >= 3)
                     {
-                        bits[(i*8)+j] = ReadBit(resized, 256, 0, (i * 8) + (7-j));
+                        timecodeData[0] = bytes[0];
+                        timecodeData[1] = bytes[1];
+                        timecodeData[2] = bytes[2];
                     }
                 }
-                int[] data = new int[1];
-                new BitArray(bits).CopyTo(data, 0);
-                // we can think of this timecode as a "cursor", the times at which the LT's performance is being played out.
-                // because of the buffer, it may end up a little in the past.. so we need to buffer a bunch of it and wait
-                // for the current time to catch up.
-                timecodeFromBot = data[0] / 100.0;
-                
+                byte[] timecodeGrid = DrawGrid(timecodeData, bladeSizeX, bladeSizeY);
+                DrawImage(gridPreviewLTStream.CreateGraphics(), timecodeGrid, bladeSizeX, bladeSizeY);
+                byte[] timecodeGrid4 = ResizeImage(timecodeGrid, bladeSizeX, bladeSizeY, 4);
+                spoutForLT.SendImage(timecodeGrid4, bladeSizeX * 4, bladeSizeY * 4);
+
+
+                double timecodePlayout = timecode - delayInSeconds;
+
+                // decode timecode from game
+                double timecodeFromBot = 0;
+                bool[] bits = new bool[3 * 8];
+
+                timecodeFromBot = ((combinedData[2] << 16) | (combinedData[1] << 8) | combinedData[0]) / 100.0;
+
+                //debug += "combinedData[0]: " + combinedData[0] + ", combinedData[1]: " + combinedData[1] + ", combinedData[2]: " + combinedData[2] + "\n";
+                debug += "timecodeFromBot: " + timecodeFromBot.ToString("0.00") + "\n";
+
+                debug += "timecodePlayout: " + timecodePlayout.ToString("0.00") + "\n";
+
                 timecodeBuffer[currentBufferIndex] = timecodeFromBot;
-                dataBuffer[currentBufferIndex] = captured;
+                for (int i = 0; i < dataBuffer.Length; i++)
+                {
+                    if (dataBuffer[i] == null)
+                        dataBuffer[i] = new byte[combinedData.Length];
+                }
+                Array.Copy(combinedData, dataBuffer[currentBufferIndex], combinedData.Length);
+                //dataBuffer[currentBufferIndex] = combinedData;
                 currentBufferIndex++;
                 currentBufferIndex %= bufferSize;
 
-                if (captured.Length == (256*4 * 52*4)*4)
+                double smallestDelta = 99999;
+                int smallestDeltaIdx = -1;
+                for (int i = 0; i < timecodeBuffer.Length; i++)
                 {
-                    spout.SendImage(captured, 256*4, 52*4);
-                }
-            }
-
-            double smallestDelta = 99999;
-            int smallestDeltaIdx = -1;
-            for (int i = 0; i < timecodeBuffer.Length; i++)
-            {
-                double delta = Math.Abs(timecodeBuffer[i] - timecodePlayout);
-                if (delta < smallestDelta)
-                {
-                    smallestDeltaIdx = i;
-                    smallestDelta = delta;
-                }
-            }
-
-            double closestTimecode = -1;
-
-            if (smallestDeltaIdx >= 0)
-            {
-                closestTimecode = timecodeBuffer[smallestDeltaIdx];
-            }
-
-            debug += "closest timecode: " + closestTimecode.ToString("0.00") + "\n";
-            debug += "timecode: " + timecode.ToString("0.00") + "\n";
-            debug += "timecodeFromBot: " + timecodeFromBot.ToString("0.00") + "\n";
-            debug += "timecodePlayout: " + timecodePlayout.ToString("0.00") + "\n";
-            debug += "\n";
-
-            if (framerate)
-                debug += "FRAMERATE\n";
-            else
-                debug += "\n";
-
-            debug += "setup: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
-            checkTimestamp = Stopwatch.GetTimestamp();
-
-            int bladeSizeX = res1440p.Checked ? 640 : 480;
-            int bladeSizeY = 8 * 6 + 4;
-            int outputScale = 4;
-
-            byte[] grid = DrawGrid(combinedData, bladeSizeX, bladeSizeY);
-            byte[] output = ResizeImage(grid, bladeSizeX, bladeSizeY, outputScale);
-            spoutForLT.SendImage(output, bladeSizeX * outputScale, bladeSizeY * outputScale);
-
-            if (midiOutput != null)
-            {
-                if (isMidiReady())
-                {
-                    //Midi updates
-                    int midiUpdates = 0;
-                    int midiCap = bigDataCheck.Checked ? 3200 : 100;
-                    int scanCap = bigDataCheck.Checked ? 100 : 10;
-                    int maxMidiChannels = bigDataCheck.Checked ? 16384 : 4096;
-                    for (int i = midiCatchup; i < combinedData.Length; i++)
+                    double delta = Math.Abs(timecodeBuffer[i] - timecodePlayout);
+                    if (delta < smallestDelta)
                     {
-                        if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + scanCap)) && i < maxMidiChannels)
+                        smallestDeltaIdx = i;
+                        smallestDelta = delta;
+                    }
+                }
+                debug += "currentBufferIndex: " + currentBufferIndex + "\n";
+                debug += "smallestDeltaIdx: " + smallestDeltaIdx + "\n";
+
+                double closestTimecode = -1;
+                byte[] closestBuffer = null;
+
+                if (smallestDeltaIdx >= 0)
+                {
+                    closestTimecode = timecodeBuffer[smallestDeltaIdx];
+                    closestBuffer = dataBuffer[smallestDeltaIdx];
+                }
+
+                if (closestBuffer != null)
+                {
+                    byte[] grid = DrawGrid(closestBuffer, bladeSizeX, bladeSizeY);
+                    DrawImage(gridPreviewMainStream.CreateGraphics(), grid, bladeSizeX, bladeSizeY);
+                    byte[] grid4 = ResizeImage(timecodeGrid, bladeSizeX, bladeSizeY, 4);
+                    spoutForMainStream.SendImage(grid4, bladeSizeX * 4, bladeSizeY * 4);
+                }
+                //string debug = "";
+                //debug += "closest timecode: " + closestTimecode.ToString("0.00") + "\n";
+                //debug += "timecode: " + timecode.ToString("0.00") + "\n";
+                //debug += "timecodeFromBot: " + timecodeFromBot.ToString("0.00") + "\n";
+                //debug += "timecodePlayout: " + timecodePlayout.ToString("0.00") + "\n";
+                //debug += "\n";
+                //
+                //if (framerate)
+                //    debug += "FRAMERATE\n";
+                //else
+                //    debug += "\n";
+                //
+                //debug += "setup: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
+                checkTimestamp = Stopwatch.GetTimestamp();
+
+                //int outputScale = 4;
+
+
+                //DrawImage(gridPreviewLT.CreateGraphics(), resized, bladeSizeX, bladeSizeY);
+                //debug += "render: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
+                //checkTimestamp = Stopwatch.GetTimestamp();
+                //
+                //long totalTime = (Stopwatch.GetTimestamp() - startTimestamp) * 1000 * 1000 / Stopwatch.Frequency;
+                //framerate = totalTime > 33000;
+                //if (framerate)
+                //    slow.ForeColor = Color.Red;
+                //else
+                //    slow.ForeColor = Color.Black;
+
+
+            }
+            else
+            {
+
+                byte[] grid = DrawGrid(combinedData, bladeSizeX, bladeSizeY);
+                DrawImage(gridPreviewMainStream.CreateGraphics(), grid, bladeSizeX, bladeSizeY);
+                DrawImage(gridPreviewLTStream.CreateGraphics(), grid, bladeSizeX, bladeSizeY);
+                DrawImage(gridPreviewLTRecording.CreateGraphics(), grid, bladeSizeX, bladeSizeY);
+
+                if (midiOutput != null)
+                {
+                    if (isMidiReady())
+                    {
+                        //Midi updates
+                        int midiUpdates = 0;
+                        int midiCap = bigDataCheck.Checked ? 3200 : 100;
+                        int scanCap = bigDataCheck.Checked ? 100 : 10;
+                        int maxMidiChannels = bigDataCheck.Checked ? 16384 : 4096;
+                        for (int i = midiCatchup; i < combinedData.Length; i++)
                         {
-                            midiUpdates++;
-                            if (midiUpdates >= midiCap)
+                            if ((combinedData[i] != midiData[i] || (i >= midiScanPosition && i < midiScanPosition + scanCap)) && i < maxMidiChannels)
                             {
-                                midiCatchup = i;
-                                break;
-                            }
-                            midiData[i] = combinedData[i];
-            
-                            int bank = i / 2048;
-            
-                            if (bank != bankStatus)
-                            {
-                                ChangeBanks(bank);
                                 midiUpdates++;
-                            }
-            
-                            int t = i - (bank * 2048);
-            
-                            if (t < 1024)
-                            {
-                                NoteOnEvent noteOn = new NoteOnEvent();
-                                noteOn.Channel = (FourBitNumber)((t >> 6) & 0xF);
-                                noteOn.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
-                                noteOn.Velocity = (SevenBitNumber)(combinedData[i] & 0x7F);
-                                midiOutput.SendEvent(noteOn);
-                            }
-                            else {
-                                t = t - 1024;
-                                NoteOffEvent noteOff = new NoteOffEvent();
-                                noteOff.Channel = (FourBitNumber)((t >> 6) & 0xF);
-                                noteOff.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
-                                noteOff.Velocity = (SevenBitNumber)(combinedData[i] & 0x7F);
-                                midiOutput.SendEvent(noteOff);
+                                if (midiUpdates >= midiCap)
+                                {
+                                    midiCatchup = i;
+                                    break;
+                                }
+                                midiData[i] = combinedData[i];
+
+                                int bank = i / 2048;
+
+                                if (bank != bankStatus)
+                                {
+                                    ChangeBanks(bank);
+                                    midiUpdates++;
+                                }
+
+                                int t = i - (bank * 2048);
+
+                                if (t < 1024)
+                                {
+                                    NoteOnEvent noteOn = new NoteOnEvent();
+                                    noteOn.Channel = (FourBitNumber)((t >> 6) & 0xF);
+                                    noteOn.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
+                                    noteOn.Velocity = (SevenBitNumber)(combinedData[i] & 0x7F);
+                                    midiOutput.SendEvent(noteOn);
+                                }
+                                else
+                                {
+                                    t = t - 1024;
+                                    NoteOffEvent noteOff = new NoteOffEvent();
+                                    noteOff.Channel = (FourBitNumber)((t >> 6) & 0xF);
+                                    noteOff.NoteNumber = (SevenBitNumber)(((t << 1) & 0x7F) + ((combinedData[i] >> 7) & 0x1));
+                                    noteOff.Velocity = (SevenBitNumber)(combinedData[i] & 0x7F);
+                                    midiOutput.SendEvent(noteOff);
+                                }
                             }
                         }
-                    }
-            
-                    if (midiUpdates < midiCap)
-                    {
-                        midiCatchup = 0;
-                    }
-            
-                    midiStatus.Text = "Connected - Sending Data";
-                    midiStatus.ForeColor = Color.Black;
-            
-                    midiScanPosition += scanCap;
-                    if (midiScanPosition > maxMidiChannels)
-                    {
-                        midiScanPosition = 0;
-                    }
-            
-                    midiWatchdog();
-                    midiUpdate = Stopwatch.GetTimestamp();
-                } else
-                {
-                    float midiTimeout = (float) (Stopwatch.GetTimestamp() - midiUpdate) / (float) Stopwatch.Frequency;
-                    if (midiTimeout > 1)
-                    {
-                        midiCatchup = 0;
-                        midiStatus.Text = "Connected - Waiting";
+
+                        if (midiUpdates < midiCap)
+                        {
+                            midiCatchup = 0;
+                        }
+
+                        midiStatus.Text = "Connected - Sending Data";
                         midiStatus.ForeColor = Color.Black;
-            
-                        midiReset();
-            
+
+                        midiScanPosition += scanCap;
+                        if (midiScanPosition > maxMidiChannels)
+                        {
+                            midiScanPosition = 0;
+                        }
+
+                        midiWatchdog();
                         midiUpdate = Stopwatch.GetTimestamp();
                     }
+                    else
+                    {
+                        float midiTimeout = (float)(Stopwatch.GetTimestamp() - midiUpdate) / (float)Stopwatch.Frequency;
+                        if (midiTimeout > 1)
+                        {
+                            midiCatchup = 0;
+                            midiStatus.Text = "Connected - Waiting";
+                            midiStatus.ForeColor = Color.Black;
+
+                            midiReset();
+
+                            midiUpdate = Stopwatch.GetTimestamp();
+                        }
+                    }
                 }
+
             }
 
-            DrawImage(gridPreview.CreateGraphics(), grid, bladeSizeX, bladeSizeY);
-            debug += "render: " + (Stopwatch.GetTimestamp() - checkTimestamp) * 1000 * 1000 / Stopwatch.Frequency + "\n";
-            checkTimestamp = Stopwatch.GetTimestamp();
-
-            long totalTime = (Stopwatch.GetTimestamp() - startTimestamp) * 1000 * 1000 / Stopwatch.Frequency;
-            framerate = totalTime > 33000;
-            if(framerate)
-                slow.ForeColor = Color.Red;
-            else
-                slow.ForeColor = Color.Black;
-            slow.Text = debug;
         }
 
         void DrawImage(Graphics gr, byte[] data, int sizeX, int sizeY)
@@ -770,37 +874,37 @@ namespace FuralityGridNode
         private void Form1_Load(object sender, EventArgs e)
         {
             spoutForLT = new SpoutWrapper("PHC GridNode - For LT", true);
-            spout = new SpoutWrapper("PHC GridNode", true);
+            spoutForMainStream = new SpoutWrapper("PHC GridNode", true);
             StartArtNetClient();
         }
 
         void StartArtNetClient()
         {
-            artnetClient = new ArtNet(ipInput.Text, portInput.Text);
+            artnetClient = new ArtNet(artNetIpRecieveInput.Text, artNetRecievePortInput.Text);
             artnetClient.StartClient();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (testAnimationTime > 0)
-            {
-                float sin2 = (float)Math.Sin(testAnimationTime * 8.0f) * 0.5f + 0.5f;
-                byte[] data;
-                data = new byte[(int)(512 * 16 * sin2)];
-
-                for (int i = 0; i < data.Length; i++)
-                {
-                    float sin = (float)Math.Sin(i / 80.0f + testAnimationTime * 4.0f);
-                    if (sin < 0)
-                        sin += 1;
-                    float t = (float)Math.Min(Math.Max(sin, 0), 1);
-                    float fade = Math.Min(Math.Max(8 - Math.Abs(testAnimationTime * 16 - 8), 0), 1);
-                    data[i] = (byte)(t*fade*255);
-                }
-                DrawData(data);
-                testAnimationTime -= 0.0025f;
-                return;
-            }
+            //if (testAnimationTime > 0)
+            //{
+            //    float sin2 = (float)Math.Sin(testAnimationTime * 8.0f) * 0.5f + 0.5f;
+            //    byte[] data;
+            //    data = new byte[(int)(512 * 16 * sin2)];
+            //
+            //    for (int i = 0; i < data.Length; i++)
+            //    {
+            //        float sin = (float)Math.Sin(i / 80.0f + testAnimationTime * 4.0f);
+            //        if (sin < 0)
+            //            sin += 1;
+            //        float t = (float)Math.Min(Math.Max(sin, 0), 1);
+            //        float fade = Math.Min(Math.Max(8 - Math.Abs(testAnimationTime * 16 - 8), 0), 1);
+            //        data[i] = (byte)(t*fade*255);
+            //    }
+            //    DrawData(data, false, false);
+            //    testAnimationTime -= 0.0025f;
+            //    return;
+            //}
 #if DEBUG
            //Trace.WriteLine($"ArtNet Status: {artnetClient.status}");
 #endif
@@ -815,8 +919,24 @@ namespace FuralityGridNode
 
             if (update)
             {
+                debug = "";
                 update = false;
-                DrawData(artnetClient.combinedData);
+                if (botSend.Checked)
+                {
+                    DrawData(artnetClient.combinedData, false, true);
+                }
+
+                if (botRecieve.Checked)
+                {
+                    if (!writingRecieveData)
+                        DrawData(artnetClient.combinedData, true, false);
+                }
+
+                // normal send
+                if(!botRecieve.Checked && !botSend.Checked)
+                    DrawData(artnetClient.combinedData, false, false);
+
+                slow.Text = debug;
             }
 
             if (statusTextLast != statusText)
@@ -833,12 +953,6 @@ namespace FuralityGridNode
             Environment.Exit(0);
         }
 
-        private void colorTypeDropdown_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (artnetClient != null)
-                DrawData(artnetClient.combinedData);
-        }
-
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -847,8 +961,8 @@ namespace FuralityGridNode
 
         private void inputChanged_TextChanged(object sender, EventArgs e)
         {
-            if(artnetClient != null)
-                DrawData(artnetClient.combinedData);
+            //if(artnetClient != null)
+            //    DrawData(artnetClient.combinedData);
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -856,16 +970,20 @@ namespace FuralityGridNode
             Trace.WriteLine("Button1 Clicked");
             if (artnetClient != null)
             {
-                artnetClient.Unicast = unicast.Checked;
-                artnetClient.RestartClient(ipInput.Text, portInput.Text);
+                artnetClient.Unicast = artNetUnicast.Checked;
+                artnetClient.RestartClient(artNetIpRecieveInput.Text, artNetRecievePortInput.Text);
             }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveSettings();
-            Application.Exit();
-            Environment.Exit(0);
+
+            //Application.Exit();
+            //Environment.Exit(0);
+
+            // just die actually
+            Process.GetCurrentProcess().Kill();
         }
 
         private void populateMidi()
@@ -1070,37 +1188,37 @@ namespace FuralityGridNode
 
         private void screenshot(object sender, EventArgs e)
         {
-            return;
-            int previewSizeX = 0;//bladeSizeX * previewScale);
-            int previewSizeY = 0;//(bladeSizeY * previewScale);
-            
-            int outputSizeX = 0;//ladeSizeX * outputScale;
-            int outputSizeY = 0;//bladeSizeY * outputScale;
-            
-            Bitmap image = new Bitmap(outputSizeX, outputSizeY, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            
-            GCHandle pinnedArray = GCHandle.Alloc(preview, GCHandleType.Pinned);
-            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
-            Graphics gr = Graphics.FromImage(image);
-            IntPtr hdc = gr.GetHdc();
-            BITMAPINFO bmi = new BITMAPINFO();
-            bmi.bmiHeader = new BITMAPINFOHEADER
-            {
-                biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
-                biWidth = previewSizeX,
-                biHeight = -previewSizeY, // Negative height to indicate a top-down DIB
-                biPlanes = 1,
-                biBitCount = 32,
-                biCompression = 0, // BI_RGB
-                biSizeImage = (uint)(previewSizeX * previewSizeY) // pixel count
-            };
-            StretchDIBits(hdc, 0, 0, outputSizeX, outputSizeY, 0, 0, previewSizeX, previewSizeY, pointer, ref bmi, 0, 0x00CC0020);
-            gr.ReleaseHdc(hdc);
-            pinnedArray.Free();
-            
-            string filename = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss fff");
-            
-            image.Save($"{filename}.png", ImageFormat.Png);
+            //return;
+            //int previewSizeX = 0;//bladeSizeX * previewScale);
+            //int previewSizeY = 0;//(bladeSizeY * previewScale);
+            //
+            //int outputSizeX = 0;//ladeSizeX * outputScale;
+            //int outputSizeY = 0;//bladeSizeY * outputScale;
+            //
+            //Bitmap image = new Bitmap(outputSizeX, outputSizeY, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            //
+            //GCHandle pinnedArray = GCHandle.Alloc(preview, GCHandleType.Pinned);
+            //IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+            //Graphics gr = Graphics.FromImage(image);
+            //IntPtr hdc = gr.GetHdc();
+            //BITMAPINFO bmi = new BITMAPINFO();
+            //bmi.bmiHeader = new BITMAPINFOHEADER
+            //{
+            //    biSize = (uint)Marshal.SizeOf(typeof(BITMAPINFOHEADER)),
+            //    biWidth = previewSizeX,
+            //    biHeight = -previewSizeY, // Negative height to indicate a top-down DIB
+            //    biPlanes = 1,
+            //    biBitCount = 32,
+            //    biCompression = 0, // BI_RGB
+            //    biSizeImage = (uint)(previewSizeX * previewSizeY) // pixel count
+            //};
+            //StretchDIBits(hdc, 0, 0, outputSizeX, outputSizeY, 0, 0, previewSizeX, previewSizeY, pointer, ref bmi, 0, 0x00CC0020);
+            //gr.ReleaseHdc(hdc);
+            //pinnedArray.Free();
+            //
+            //string filename = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss fff");
+            //
+            //image.Save($"{filename}.png", ImageFormat.Png);
         }
 
         float testAnimationTime = 0;
@@ -1125,7 +1243,12 @@ namespace FuralityGridNode
                 SetWindowSize(hwnd, 1920, 1080);
         }
 
-        private void refresh_Click(object sender, EventArgs e)
+        private void timer2_Tick_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click_2(object sender, EventArgs e)
         {
             allWindows = FindWindowsByTitle("VRChat", true, true);
             vrchatWindowSelect.DataSource = allWindows;
